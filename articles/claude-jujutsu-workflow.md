@@ -1,9 +1,9 @@
 ---
-title: "Claude Code × jujutsu - AIがバージョン管理を実行する時代"
+title: "バイブコーダーがgitを卒業してjujutsuに乗り換えた話"
 emoji: "🤖"
 type: "tech"
 topics: ["jujutsu", "claudecode", "ai", "versioncontrol", "git"]
-published: false
+published: true
 ---
 
 ## はじめに
@@ -237,11 +237,19 @@ jj resolve conflicted_file.txt
 
 ---
 
-**AIがコード書く時代、バージョン管理もAIに任せよう。**
+駆け出しの頃、gitコマンドをAIにやらせてることが後ろめたかった。
 
-jujutsuは「ミスっても大丈夫」っていう安心感をくれる。Claude Codeと組み合わせたら、バージョン管理の面倒から解放される。
+今は違う。
 
-マジで試してみて。世界変わるから。
+**コミットメッセージのAI生成は当たり前。バージョン管理自体もAIに任せていい時代。**
+
+jujutsuは「ミスっても`jj undo`で戻せる」という安心感をくれる。Claude Codeと組み合わせたら、バージョン管理の面倒から解放される。
+
+あの日Meetupで教えてもらった一言が、私の開発体験を変えた。
+
+**「エージェント並列開発するなら、jujutsuがいいよ」**
+
+マジで試してみて。
 
 ---
 
