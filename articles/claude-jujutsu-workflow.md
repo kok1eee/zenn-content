@@ -81,15 +81,20 @@ git MCPを連携して、AIにバージョン管理を任せる体制が整っ�
 ### jujutsuが全部解決してくれた
 
 ```bash
-# Gitの場合（2ステップ、ミスりやすい）
+# Gitの場合
 git add .
 git commit -m "feat: 新機能"
+git push
 
-# jujutsuの場合（1ステップ、変更は勝手に追跡される）
+# jujutsuの場合
 jj describe -m "feat: 新機能"
+jj bookmark set main -r @
+jj git push
 ```
 
-これ、マジで革命。
+ステップ数は同じ。でも決定的に違うのは**`git add`がいらない**こと。
+
+変更は勝手に追跡される。ステージングという概念がない。これがデカい。
 
 - **`git add`いらない** → ファイル変更したら勝手に追跡される
 - **`jj undo`で何でも戻せる** → ミスっても平気。何度でもやり直せる
