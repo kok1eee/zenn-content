@@ -165,6 +165,16 @@ alias oc="opencode"
 
 プロンプトに `ultrawork` を含めると、全機能がフル稼働する。
 
+### セッション再開はちょっと手間
+
+Claude Code だと `--continue` でカレントディレクトリの会話を再開できる。
+
+OpenCode の場合：
+- `--continue`: グローバルで最後のセッションを再開
+- 特定のセッションを再開したい場合は、起動後に `Ctrl+P` → `Switch session` で探す
+
+ディレクトリごとの自動再開はない。ここは Claude Code の方が楽。
+
 ## 設定ファイル
 
 ### ~/.config/opencode/opencode.json
