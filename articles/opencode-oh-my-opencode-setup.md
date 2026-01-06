@@ -1,9 +1,9 @@
 ---
-title: "OpenCode + oh-my-opencode で最強のAIコーディング環境を構築する"
+title: "Claude Codeの日本語問題を機にOpenCode + oh-my-opencodeを試してみた"
 emoji: "🚀"
 type: "tech"
 topics: ["opencode", "ai", "cli", "claude", "gemini"]
-published: false
+published: true
 ---
 
 ## はじめに
@@ -33,6 +33,8 @@ Rust panic: byte index not char boundary with Japanese text
 「複数のAIモデルを協調させる」って何それ？
 
 Claude、GPT、Geminiを目的別に使い分ける？エージェントが連携する？
+
+あと、メインエージェントの名前が **Sisyphus**（シシュフォス）。かっこいい。
 
 **以前 Super Claude を見てワクワクした人は、きっと刺さる。**
 
@@ -106,22 +108,11 @@ oh-my-opencode には複数のエージェントが含まれています:
 | **Librarian** | Claude Sonnet 4.5 | ドキュメント・実装例検索 |
 | **Explore** | Grok Code | 高速コード探索 |
 
-### 無料で始める
+### 私の場合：無料モデルで運用
 
-ChatGPT や Gemini のサブスクがなくても動きます:
+ChatGPT や Gemini のサブスクは持ってない。Claude Pro だけ。
 
-- **OpenCode 無料モデル**: 認証不要で使える
-- **Claude Pro/Max のみ**: Sisyphus, Oracle 等が Claude で動作
-
-## サブスクリプション比較
-
-| サービス | 月額 | 用途 |
-|---------|------|------|
-| Claude Pro | $20 | メインエージェント |
-| ChatGPT Plus | $20 | Oracle (GPT 5.2) |
-| Google AI Pro | $20 | Frontend (Gemini 3 Pro) |
-
-**おすすめ**: まずは Claude Pro だけで始めて、必要に応じて追加。
+でも問題なく動く。oh-my-opencode の設定で、各エージェントのモデルを変更できる。私は無料モデルや Claude に振り替えて使ってる。
 
 ## 同梱 MCP
 
@@ -139,6 +130,30 @@ ChatGPT や Gemini のサブスクがなくても動きます:
 |-----|------|-----------|
 | Exa (自前APIキー) | レート制限回避 | ヘビーユーザー |
 | Morph | 高速コードベース検索 | 大規模プロジェクト |
+
+## サイドバーが便利
+
+Claude Code のステータスラインに相当する機能がある。画面右側のサイドバーに情報が表示される。
+
+**表示される情報：**
+- **Context**: コンテキスト使用量
+- **MCPs**: 接続中のMCPサーバー
+- **LSP**: 言語サーバーの状態
+- **Modified Files**: 変更されたファイル一覧
+
+作業中の状態が一目でわかるのは地味に助かる。
+
+### 将来的にはカスタマイズできそう
+
+現時点ではサイドバーの表示内容は固定。でも [Issue #5971](https://github.com/sst/opencode/issues/5971) で機能拡張が議論されてる。
+
+oh-my-opencode の作者も、バックグラウンドエージェントのステータス表示とか欲しがってるみたい。今後に期待。
+
+### 注意点：4分割だと上部に移動する
+
+ターミナルを4分割して使うと、サイドバーが右側ではなく上部に移動する。画面が狭いと判断されるみたい。
+
+正直ちょっと邪魔に感じる。広めの画面で使うか、分割数を減らすかで対応するしかない。
 
 ## 使い方
 
