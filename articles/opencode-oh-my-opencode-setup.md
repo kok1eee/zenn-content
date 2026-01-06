@@ -44,7 +44,7 @@ Super Claudeは専門家エージェントが多すぎて「使いこなせな�
 
 ## OpenCode とは
 
-[OpenCode](https://github.com/sst/opencode) は、SST が開発するオープンソースのAIコーディングエージェントです。
+[OpenCode](https://github.com/sst/opencode) は、SST が開発するオープンソースのAIコーディングエージェント。
 
 **特徴:**
 - 無限にカスタマイズ可能
@@ -54,7 +54,7 @@ Super Claudeは専門家エージェントが多すぎて「使いこなせな�
 
 ## oh-my-opencode とは
 
-[oh-my-opencode](https://github.com/code-yeongyu/oh-my-opencode) は、OpenCode を強化するプラグインです。
+[oh-my-opencode](https://github.com/code-yeongyu/oh-my-opencode) は、OpenCode を強化するプラグイン。
 
 **同梱されているもの:**
 - **エージェント**: Sisyphus, Oracle, Librarian, Explore など
@@ -163,7 +163,7 @@ opencode
 alias oc="opencode"
 ```
 
-プロンプトに `ultrawork` を含めると、全機能がフル稼働します。
+プロンプトに `ultrawork` を含めると、全機能がフル稼働する。
 
 ## 設定ファイル
 
@@ -180,7 +180,7 @@ alias oc="opencode"
 
 ### ~/.config/opencode/oh-my-opencode.json
 
-エージェントのモデルをカスタマイズできます:
+エージェントのモデルをカスタマイズできる：
 
 ```json
 {
@@ -200,4 +200,6 @@ alias oc="opencode"
 
 ## まとめ
 
-OpenCode + oh-my-opencode を使えば、複数のAIモデルを協調させる強力なコーディング環境が構築できます。まずは Claude Pro だけで始めて、物足りなければ ChatGPT や Gemini を追加していくのがおすすめです。
+OpenCode + oh-my-opencode で、複数のAIモデルを協調させるコーディング環境が作れる。まずは Claude Pro だけで始めて、物足りなければ ChatGPT や Gemini を追加していけばいい。
+
+まだ使い始めなので、発見があればガンガン追記していく予定。
