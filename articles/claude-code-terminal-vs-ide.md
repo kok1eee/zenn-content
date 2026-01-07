@@ -3,7 +3,7 @@ title: "海外で「IDEでClaude Code動かすな」が流行ってる。時代�
 emoji: "💻"
 type: "tech"
 topics: ["claudecode", "zed", "opencode", "terminal", "wezterm"]
-published: false
+published: true
 ---
 
 ## はじめに
