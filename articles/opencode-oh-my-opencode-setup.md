@@ -112,6 +112,19 @@ oh-my-opencode には複数のエージェントが含まれている：
 | **Librarian** | Claude Sonnet 4.5 | ドキュメント・実装例検索 |
 | **Explore** | Grok Code | 高速コード探索 |
 
+### Sisyphusの元ネタ？：Claude CodeのRalph Wiggum
+
+oh-my-opencodeの「Sisyphus」や「Ralph Loop」は、**Claude Code公式プラグインの「Ralph Wiggum」にインスパイアされているっぽい**。
+
+Ralph Wiggumはタスクが完了するまで実行し続ける自己参照型開発ループ。oh-my-opencodeではこれを`ralph-loop`として実装している：
+
+- `/ralph-loop "REST API を構築"` で開始
+- `<promise>DONE</promise>` の出力で完了を検知
+- 完了プロミスなしで停止すると自動再開
+- 終了条件: 完了検知、最大反復回数到達（デフォルト100）、または `/cancel-ralph`
+
+岩を転がし続けるSisyphusの大元は、Claude Codeにもいたラルフくんだった。
+
 ### 私の場合：無料モデルで運用
 
 ChatGPT や Gemini のサブスクは持ってない。Claude Pro だけ。
