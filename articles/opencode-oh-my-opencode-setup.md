@@ -26,6 +26,10 @@ Rust panic: byte index not char boundary with Japanese text
 
 **日本語ユーザーにはなかなかキツい。**
 
+:::message
+**2025/1/8 追記**: Claude Code v2.1.0で「CJK改行問題修正」がリリースされました。日本語の改行表示バグが修正されたかもしれません。
+:::
+
 治るまでの間、代替ツールを探してた。そしたら見つけてしまった。
 
 ### oh-my-opencodeが面白そう
