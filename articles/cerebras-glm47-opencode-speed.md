@@ -133,7 +133,7 @@ OpenCodeはCerebrasを公式サポートしてる。
 - 入力: $2.25/M tokens
 - 出力: $2.75/M tokens
 
-**Freeは1日1Mトークンまで無料。** それ以上使いたいならDeveloperで従量課金。
+**Freeは1日1Mトークンまで無料。** ただし速すぎてrate limitに引っかかる。毎回1分待たされるので、実用的には$10課金（Developer）が必要。
 
 ### Cerebras Code（専用ツール）
 
@@ -141,7 +141,7 @@ OpenCodeはCerebrasを公式サポートしてる。
 
 ---
 
-**結論：** OpenCodeで試すならまずFreeから。1日1Mトークンで足りなければDeveloper。
+**結論：** OpenCodeで試すならまずFreeから。rate limitがキツければDeveloper（$10〜）。
 
 ## まとめ
 

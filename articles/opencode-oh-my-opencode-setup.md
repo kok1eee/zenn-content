@@ -278,13 +278,23 @@ This credential is only authorized for use with Claude Code and cannot be used f
 
 参考: [sst/opencode#417](https://github.com/sst/opencode/issues/417)
 
-:::details 修正PRについて
+:::details 回避策（友人情報）
 
-[PR #10](https://github.com/anomalyco/opencode-anthropic-auth/pull/10) で修正が進んでいる。
-ツール名に `oc_` プレフィックスを付けてチェックを回避する方法らしい。
+[PR #10](https://github.com/anomalyco/opencode-anthropic-auth/pull/10) で修正が進んでいる。友人から簡単な適用方法を教えてもらった。
 
-ただし本体への統合（[#5957](https://github.com/anomalyco/opencode/issues/5957)）がまだなので、使うにはローカルビルドが必要。
-正式リリースを待つのが無難。
+1. [anomalyco/opencode](https://github.com/anomalyco/opencode) をClone
+2. `packages/opencode/src/plugin/index.ts` の14行目あたりを編集：
+   ```diff
+   - const BUILTIN = ["opencode-copilot-auth@0.0.9", "opencode-anthropic-auth@0.0.5"]
+   + const BUILTIN = ["opencode-copilot-auth@0.0.9", "opencode-anthropic-auth@0.0.6"]
+   ```
+3. ビルド：`cd opencode/packages/opencode && bun run build -- --single`
+4. PATHを通す：
+   ```bash
+   export PATH=/path/to/opencode/packages/opencode/dist/opencode-darwin-arm64/bin/:$PATH
+   ```
+
+正式リリースで同じ修正が来るはずなので、先回りしたい人向け。
 
 :::
 
