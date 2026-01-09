@@ -259,6 +259,25 @@ Claude Code だとターミナルに画像をドラッグ&ドロップできる�
 
 アウトプットの中身をある程度見たい派なので、2分割くらいが体験良さそう。小さすぎると見づらい。
 
+### Claude Code OAuthは使えなくなった
+
+:::message alert
+**2025/1/9 追記**: Claude Code の OAuth トークンを OpenCode で使うことはできなくなりました。
+:::
+
+以前は特殊なヘッダーで動作していたらしいが、Anthropic が対策した模様。
+
+```
+This credential is only authorized for use with Claude Code and cannot be used for other API requests.
+```
+
+**OpenCode で Claude を使いたい場合は、別途 API キーを発行する必要がある。**
+
+- Claude Max/Pro サブスクリプション → Claude Code 専用
+- API キー（従量課金） → OpenCode 等の他ツール用
+
+参考: [sst/opencode#417](https://github.com/sst/opencode/issues/417)
+
 ## 設定ファイル
 
 ### ~/.config/opencode/opencode.json
