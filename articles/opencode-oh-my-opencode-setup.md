@@ -76,20 +76,25 @@ mise を使う場合:
 # GitHub attestations を無効化（レート制限回避）
 mise settings github.github_attestations false
 
-# インストール
-mise use --pin -g "github:sst/opencode@1.1.1"
+# インストール（latest推奨）
+mise use -g "github:sst/opencode@latest"
 ```
 
 ### 2. oh-my-opencode のインストール
 
 ```bash
-npx oh-my-opencode install --no-tui --claude=yes --chatgpt=no --gemini=no
+# bunx推奨（npxより高速）
+bunx oh-my-opencode@latest install
 ```
 
-オプション:
-- `--claude=yes|no|max20`: Claude Pro/Max サブスク
-- `--chatgpt=yes|no`: ChatGPT Plus/Pro サブスク
-- `--gemini=yes|no`: Google AI Pro サブスク
+対話式インストーラーが起動し、Claude・ChatGPT・Geminiのサブスクリプション設定を行う。
+
+:::details v3.0.0-beta を試したい場合
+```bash
+bunx oh-my-opencode@3.0.0-beta.2 install
+```
+Orchestrator機能（Prometheus, Metis, Sisyphus-Junior等の新エージェント体系）が使える。
+:::
 
 ### 3. 認証
 
@@ -278,15 +283,26 @@ This credential is only authorized for use with Claude Code and cannot be used f
 
 参考: [sst/opencode#417](https://github.com/sst/opencode/issues/417)
 
-:::details 回避策（友人情報）
+:::details 回避策（2025/1/10 更新）
 
-[PR #10](https://github.com/anomalyco/opencode-anthropic-auth/pull/10) で修正が進んでいる。友人から簡単な適用方法を教えてもらった。
+[PR #10](https://github.com/anomalyco/opencode-anthropic-auth/pull/10) がマージされ、v0.0.7 がリリースされた。
+
+**方法1: opencode.json で指定（簡単）**
+
+`~/.config/opencode/opencode.json` に追加：
+```json
+{
+  "plugin": ["opencode-anthropic-auth@0.0.7"]
+}
+```
+
+**方法2: ローカルビルド**
 
 1. [anomalyco/opencode](https://github.com/anomalyco/opencode) をClone
 2. `packages/opencode/src/plugin/index.ts` の14行目あたりを編集：
    ```diff
    - const BUILTIN = ["opencode-copilot-auth@0.0.9", "opencode-anthropic-auth@0.0.5"]
-   + const BUILTIN = ["opencode-copilot-auth@0.0.9", "opencode-anthropic-auth@0.0.6"]
+   + const BUILTIN = ["opencode-copilot-auth@0.0.9", "opencode-anthropic-auth@0.0.7"]
    ```
 3. ビルド：`cd opencode/packages/opencode && bun run build -- --single`
 4. PATHを通す：
@@ -294,7 +310,7 @@ This credential is only authorized for use with Claude Code and cannot be used f
    export PATH=/path/to/opencode/packages/opencode/dist/opencode-darwin-arm64/bin/:$PATH
    ```
 
-正式リリースで同じ修正が来るはずなので、先回りしたい人向け。
+⚠️ **注意**: 一部ユーザーから再度ブロックされた報告あり。[PR #13](https://github.com/anomalyco/opencode-anthropic-auth/pull/13)、[#14](https://github.com/anomalyco/opencode-anthropic-auth/pull/14) で対応中。
 
 :::
 
