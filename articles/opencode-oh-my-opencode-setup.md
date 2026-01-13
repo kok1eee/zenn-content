@@ -287,36 +287,18 @@ This credential is only authorized for use with Claude Code and cannot be used f
 
 参考: [sst/opencode#417](https://github.com/sst/opencode/issues/417)
 
-:::details 回避策（⚠️ 非推奨・BAN報告あり）
+:::details 回避策（⚠️ いたちごっこ中）
 
-**警告**: この回避策を使用するとアカウントBANされる可能性がある。自己責任で。
+**警告**: Anthropicとのいたちごっこ。検知パターンが変わったらまた止まる可能性あり。自己責任で。
 
-[PR #10](https://github.com/anomalyco/opencode-anthropic-auth/pull/10) がマージされ、v0.0.7 がリリースされた。
-
-**方法1: opencode.json で指定（簡単）**
+**2025/1/13 更新**: v0.0.8 で動作確認。
 
 `~/.config/opencode/opencode.json` に追加：
 ```json
 {
-  "plugin": ["opencode-anthropic-auth@0.0.7"]
+  "plugin": ["opencode-anthropic-auth@0.0.8"]
 }
 ```
-
-**方法2: ローカルビルド**
-
-1. [anomalyco/opencode](https://github.com/anomalyco/opencode) をClone
-2. `packages/opencode/src/plugin/index.ts` の14行目あたりを編集：
-   ```diff
-   - const BUILTIN = ["opencode-copilot-auth@0.0.9", "opencode-anthropic-auth@0.0.5"]
-   + const BUILTIN = ["opencode-copilot-auth@0.0.9", "opencode-anthropic-auth@0.0.7"]
-   ```
-3. ビルド：`cd opencode/packages/opencode && bun run build -- --single`
-4. PATHを通す：
-   ```bash
-   export PATH=/path/to/opencode/packages/opencode/dist/opencode-darwin-arm64/bin/:$PATH
-   ```
-
-⚠️ **注意**: 一部ユーザーから再度ブロックされた報告あり。[PR #13](https://github.com/anomalyco/opencode-anthropic-auth/pull/13)、[#14](https://github.com/anomalyco/opencode-anthropic-auth/pull/14) で対応中。
 
 :::
 
