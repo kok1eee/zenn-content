@@ -1,5 +1,5 @@
 ---
-title: "LFM 2.5からAI半導体の世界を覗いてみた"
+title: "日本発AI半導体Lenzoを調べていたら寄り道してRubinにたどり着いた"
 emoji: "🔥"
 type: "tech"
 topics: ["ai", "半導体", "cerebras", "lenzo", "cuda"]
@@ -21,6 +21,9 @@ published: false
 ### Lenzoの話を聞いて「何もわかってない」と気づいた
 
 そこから色々流れてくる情報の中で、**Lenzo**という日本企業の話を初めて聞いた。
+
+この記事を読んだ：
+[日本発AI半導体スタートアップ "Lenzo" - note](https://note.com/neo_tech_world/n/n547457d07c11)
 
 この話を聞いて、AI半導体について全く理解していないことに気づいた。
 
