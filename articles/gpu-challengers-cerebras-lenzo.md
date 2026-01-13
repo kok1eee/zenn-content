@@ -3,7 +3,7 @@ title: "日本発AIチップLenzoを調べていたら寄り道してRubinにた
 emoji: "🔥"
 type: "tech"
 topics: ["ai", "半導体", "aiチップ", "lenzo", "nvidia"]
-published: false
+published: true
 ---
 
 ## はじめに
