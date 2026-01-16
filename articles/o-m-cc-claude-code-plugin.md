@@ -1,5 +1,5 @@
 ---
-title: "oh-my-opencodeをClaude Code向けに移植した"
+title: "oh-my-opencodeのClaude Code版を作った"
 emoji: "🪨"
 type: "tech"
 topics: ["claudecode", "ai", "cli", "plugin"]
