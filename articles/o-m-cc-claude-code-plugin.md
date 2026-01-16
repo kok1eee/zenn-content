@@ -213,6 +213,17 @@ claude plugin install o-m-cc@kok1eee
 /o-m-cc:sisyphus
 ```
 
+## 今後の展望
+
+現状は汎用的なエージェントのみ。各分野の専門家エージェントがいない。
+
+今後はskillなどで拡張していく予定：
+- Python専門家（python-master skill連携）
+- GAS専門家（gas-master skill連携）
+- セキュリティ専門家（security-master skill連携）
+
+プラグインの構造上、skillとの連携が自然にできるので、必要に応じて専門知識を追加していける。
+
 ## まとめ
 
 - oh-my-opencodeが使えなくなったので自作
