@@ -3,7 +3,7 @@ title: "oh-my-opencodeをClaude Code向けに移植した"
 emoji: "🪨"
 type: "tech"
 topics: ["claudecode", "ai", "cli", "plugin"]
-published: false
+published: true
 ---
 
 ## はじめに
@@ -220,12 +220,11 @@ claude plugin install o-m-cc@kok1eee
 
 ## 今後の展望
 
-現状は汎用的なエージェントのみ。各分野の専門家エージェントがいない。
+現状でも @advisor や @code-reviewer などの専門家はいる。
 
-skillなどで拡張してもいいかも：
+ただ、より狭い範囲の専門家を追加してもいいかも：
 - Python専門家（python-master skill連携）
 - GAS専門家（gas-master skill連携）
-- セキュリティ専門家（security-master skill連携）
 
 プラグインの構造上、skillとの連携が自然にできる。
 
