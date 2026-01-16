@@ -1,5 +1,5 @@
 ---
-title: "oh-my-opencodeが使えなくなったのでClaude Code版を自作した"
+title: "oh-my-opencodeをClaude Code向けに移植した"
 emoji: "🪨"
 type: "tech"
 topics: ["claudecode", "ai", "cli", "plugin"]
@@ -12,13 +12,17 @@ published: false
 
 ### きっかけ
 
-AnthropicがOpenCodeをBANした。
+AnthropicがサードパーティツールのOAuth認証をブロックした。
 
-oh-my-opencodeという便利なプラグインがあったが、Claude Codeでは使えない。じゃあ自分で作ろう。
+oh-my-opencodeという便利なプラグインがあったが、いつまた動かなくなるかわからない。じゃあClaude Code向けに自作してみよう。
 
 ## 作ったもの：o-m-cc
 
 **Sisyphus Loop for Claude Code** - TODOが完了するまで止まらないマルチエージェントワークフロー
+
+oh-my-opencodeの考え方を真似した。エージェントの名前とかはそのまま使わず、一番コアな思想・仕組みの名前（Sisyphus）だけあえてそのままにした。
+
+SDDみたいにSisyphusが一つの流行りワードになったりして。怒られたら変える。
 
 ### Sisyphusとは
 
@@ -28,13 +32,15 @@ oh-my-opencodeという便利なプラグインがあったが、Claude Codeで�
 
 ### 仕様駆動開発（SDD）
 
-複雑なタスクは計画から：
+cc-sddを参考に、いきなりコードを書かせない設計にした。複雑なタスクは計画から：
 
 ```
 要件定義 → ギャップ分析 → 設計 → タスク分解 → 実装
 ```
 
-`/o-m-cc:plan` コマンドで一括実行できる。
+計画フェーズをしっかり踏んでから実装に入るので、手戻りが少ない。
+
+簡単なタスクも、標準のtodoツールで簡単にリスト化してSisyphusモードで作業してくれる。
 
 ## コマンド
 
@@ -42,9 +48,16 @@ oh-my-opencodeという便利なプラグインがあったが、Claude Codeで�
 
 ```bash
 # Sisyphus モードを有効化
-# （依存プラグイン確認 + CLAUDE.md設定 + hooks設定）
 /o-m-cc:sisyphus
 ```
+
+インストーラーではなくpluginとして配布したかったので、セットアップ用のコマンドを用意した。
+
+Claudeが一緒に現在の設定を見ながらやってくれるので、既存設定を上書きしない。実行すると：
+- CLAUDE.md に Sisyphus 原則を追加
+- hooks 設定（`<promise>DONE</promise>` までループ）
+- 依存プラグインの確認・インストール
+- LSP機能（pyright-lsp、typescript-lsp）もインストール
 
 ### 計画フェーズ
 
@@ -55,6 +68,8 @@ oh-my-opencodeという便利なプラグインがあったが、Claude Codeで�
 | `/o-m-cc:tasks` | タスク分解 |
 | `/o-m-cc:plan <task>` | 上記を一括実行（scout によるギャップ分析含む） |
 
+AskQuestionでサジェストが出るようになっているので、次のコマンドを選びやすい。
+
 ### 実行
 
 | コマンド | 説明 |
@@ -63,12 +78,48 @@ oh-my-opencodeという便利なプラグインがあったが、Claude Codeで�
 | `/o-m-cc:ultrawork-compact <task>` | /compact 後に ultrawork |
 | `/o-m-cc:ultrawork-clear <task>` | /clear 後に ultrawork |
 
+hooksではなくスラッシュコマンドでやっている。実行するとこんな感じ：
+
+```
+╔══════════════════════════════════╗
+║  ⚡ ULTRAWORK MODE ENABLED ⚡    ║
+║  Parallel Agent Orchestration    ║
+╚══════════════════════════════════╝
+```
+
+完了時：
+
+```
+🚀 ULTRAWORK COMPLETE
+
+実行サマリー:
+- 起動エージェント: X個
+- 並列タスク: X個
+- 完了タスク: X/X
+
+レビュー結果:
+- Critical: なし
+- Warning: X件
+
+✅ 全要件達成
+```
+
+（まだ2回くらいしか試してないので調整入るかも）
+
 ### 品質
 
 ```bash
 # コードレビュー（security-guidance連携 + code-simplifier提案）
 /o-m-cc:review
 ```
+
+oh-my-opencodeだとDONEでそのまま終了だが、o-m-ccは実装完了後にコードレビューを挟む：
+
+```
+実装完了 → @code-reviewer（並列でセキュリティチェック等） → 問題あり？ → 修正ループへ
+```
+
+security-guidance や code-simplifier と連携して、問題があれば再度修正ループに突入する。
 
 ## ワークフロー
 
@@ -82,9 +133,9 @@ oh-my-opencodeという便利なプラグインがあったが、Claude Codeで�
 └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
 ```
 
-**Phase 1.5 (scout)** が特徴的：
-- Prometheus式インタビュー
-- **必ず質問で終わる**（パッシブ終了禁止）
+**Phase 1.5 (scout)** が一番こだわったポイント：
+- @scout エージェントは**必ず質問で終わる**ように設計
+- 「何か質問ありますか？」ではなく、具体的な質問を投げかけて終わる
 - 要件の漏れ・曖昧さを発見
 - Criticalな質問が解決するまで続行
 
@@ -96,7 +147,7 @@ oh-my-opencodeという便利なプラグインがあったが、Claude Codeで�
 | Agent | 役割 |
 |-------|------|
 | @analyst | 現状分析・要件定義 |
-| @scout | ギャップ分析（Prometheus式インタビュー） |
+| @scout | ギャップ分析（必ず質問で終わる） |
 | @designer | アーキテクチャ設計 |
 | @planner | タスク分解 |
 | @critic | 計画レビュー |
@@ -127,52 +178,6 @@ oh-my-opencodeという便利なプラグインがあったが、Claude Codeで�
 | code-simplifier | コード簡素化（レビュー後提案） |
 | security-guidance | セキュリティレビュー支援 |
 
-## こだわったポイント
-
-### しっかりプランを作ってから一気にコードを作る
-
-cc-sddを参考に、いきなりコードを書かせない設計にした。
-
-```
-要件定義 → ギャップ分析 → 設計 → タスク分解 → 実装
-```
-
-計画フェーズをしっかり踏んでから実装に入るので、手戻りが少ない。
-
-### AskQuestionで終わるようにした
-
-一番こだわったのはここ。
-
-@scout エージェントは**必ず質問で終わる**ように設計した。「何か質問ありますか？」で終わるのではなく、具体的な質問を投げかけて終わる。
-
-これにより：
-- 要件の漏れを発見できる
-- 曖昧な部分を明確にできる
-- 実装前に認識のズレを防げる
-
-### /sisyphusコマンドでセットアップ
-
-インストーラーではなくpluginとして配布したかったので、セットアップ用の `/o-m-cc:sisyphus` コマンドを用意した。
-
-実行すると：
-- CLAUDE.md に Sisyphus 原則を追加
-- hooks 設定（`<promise>DONE</promise>` までループ）
-- 依存プラグインの確認・インストール
-
-意外と拡張性があって、OpenCodeにあるようなLSP機能（pyright-lsp、typescript-lsp）もインストールするようにしている。
-
-### 実装後にコードレビュー → 修正ループ
-
-OpenCodeのralph-loopは実装して終わり。
-
-o-m-ccは違う。実装完了後に**コードレビューを挟む**：
-
-```
-実装完了 → @code-reviewer（並列でセキュリティチェック等） → 問題あり？ → 修正ループへ
-```
-
-security-guidance や code-simplifier と連携して、セキュリティチェックやコード簡素化を並列で実行。問題があれば再度修正ループに突入する。
-
 ## 使ってみた感想
 
 ### 正しくサブエージェントに振り分けてくれる
@@ -181,7 +186,7 @@ security-guidance や code-simplifier と連携して、セキュリティチェ
 
 ### タスク分解がしっかりしている
 
-cc-sdd を参考にしているので、計画フェーズでタスクがしっかり分解される：
+計画フェーズでタスクがしっかり分解される：
 
 ```
 Phase 1: 設定（並列可能）
@@ -217,18 +222,18 @@ claude plugin install o-m-cc@kok1eee
 
 現状は汎用的なエージェントのみ。各分野の専門家エージェントがいない。
 
-今後はskillなどで拡張していく予定：
+skillなどで拡張してもいいかも：
 - Python専門家（python-master skill連携）
 - GAS専門家（gas-master skill連携）
 - セキュリティ専門家（security-master skill連携）
 
-プラグインの構造上、skillとの連携が自然にできるので、必要に応じて専門知識を追加していける。
+プラグインの構造上、skillとの連携が自然にできる。
 
 ## まとめ
 
-- oh-my-opencodeが使えなくなったので自作
+- oh-my-opencodeが使えなくなるかもしれないので自作
 - Sisyphus哲学でTODO完了まで止まらない
-- Prometheus式インタビューで要件の漏れを発見
+- @scoutの必ず質問で終わる設計で要件の漏れを発見
 - ultraworkで並列エージェント実行
 
 GitHub: [kok1eee/o-m-cc](https://github.com/kok1eee/o-m-cc)
