@@ -12,17 +12,21 @@ published: false
 
 ### きっかけ
 
-Claude Codeのステータスラインをカスタマイズしたかった。
+API課金したので、会社のプロジェクトではなく個人の作業をしたかった。
 
-既存のツール（ccusage、ccstatusline）を参考にしつつ、自分専用の最強パーツを作りたくなった。
+ずっと欲しかったのが**4分割でも綺麗に見えるstatusline**。
+
+既存のccstatuslineやccusageを試したけど、weeklyのデータやsessionの取得が上手くいかなかった記憶がある。
+
+ccstatusline + ccusageをめっちゃ参考にしつつ、そのままコードをパクるだけだと面白くないので**Goで書いてみた**。
 
 ### Cerebrasで作った理由
 
-以前の記事でCerebras × GLM-4.7を試した。1,000トークン/秒の爆速推論。
+以前の記事で紹介したCerebras × GLM-4.7。1,000トークン/秒の爆速推論。
 
 「これでコーディングしたら速いのでは？」と思って、実際に作ってみた。
 
-## 作ったもの：cc-dashboard
+## 作ったもの：cc-quadstat
 
 Claude Code用のPowerlineスタイルのステータスライン。
 
@@ -42,7 +46,7 @@ Claude Code用のPowerlineスタイルのステータスライン。
 
 既存ツールはTypeScript製。
 
-正直なところ、**バレにくくするため**にGoにした。同じ言語だと「参考にした」感が出すぎる。
+正直なところ、同じ言語だと「参考にした」感が出すぎるので別の言語にした。
 
 あとGoは単一バイナリになるのでインストールが楽。
 
@@ -63,7 +67,7 @@ Claude Code用のPowerlineスタイルのステータスライン。
 ### 8種類のテーマ
 
 ```bash
-CC_THEME=dracula ~/.claude/scripts/cc-dashboard
+CC_THEME=dracula ~/.claude/scripts/cc-quadstat
 ```
 
 | テーマ | 説明 |
@@ -101,12 +105,12 @@ GitとJujutsu（jj）の両方に対応。
 
 ```bash
 # macOS (Apple Silicon)
-curl -L https://github.com/tazawa-masayoshi/cc-dashboard/releases/latest/download/cc-dashboard_darwin_arm64.tar.gz | tar xz
+curl -L https://github.com/kok1eee/cc-quadstat/releases/latest/download/cc-quadstat_darwin_arm64.tar.gz | tar xz
 
 # 配置
 mkdir -p ~/.claude/scripts
-mv cc-dashboard ~/.claude/scripts/
-chmod +x ~/.claude/scripts/cc-dashboard
+mv cc-quadstat ~/.claude/scripts/
+chmod +x ~/.claude/scripts/cc-quadstat
 ```
 
 ### 設定
@@ -117,7 +121,7 @@ chmod +x ~/.claude/scripts/cc-dashboard
 {
   "statusLine": {
     "type": "command",
-    "command": "CC_THEME=dracula ~/.claude/scripts/cc-dashboard"
+    "command": "CC_THEME=dracula ~/.claude/scripts/cc-quadstat"
   }
 }
 ```
@@ -132,9 +136,9 @@ chmod +x ~/.claude/scripts/cc-dashboard
 ### 課題
 
 - **ハーネスの違い**：OpenCode経由で使ったが、Claude Codeほど使い慣れていない
-- **rate limit**：Freeプランだと毎回1分待ち
+- **rate limit**：課金してもレートエラーが発生
 
-結局、途中からClaude Codeに戻って仕上げた。
+完成まで**7ドル**かかった。結局、途中からClaude Codeに戻って仕上げた。
 
 ## まとめ
 
@@ -142,7 +146,7 @@ chmod +x ~/.claude/scripts/cc-dashboard
 - 自分専用の最強ステータスラインを作成
 - Goで書いてインストールを簡単に
 
-GitHub: [tazawa-masayoshi/cc-dashboard](https://github.com/tazawa-masayoshi/cc-dashboard)
+GitHub: [kok1eee/cc-quadstat](https://github.com/kok1eee/cc-quadstat)
 
 ## 参考
 
