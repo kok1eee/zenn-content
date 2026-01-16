@@ -115,16 +115,37 @@ chmod +x ~/.claude/scripts/cc-quadstat
 
 ### 設定
 
-`~/.claude/settings.json` に追加：
+初期設定コマンドで自動設定：
+
+```bash
+cc-quadstat --init
+```
+
+または手動で `~/.claude/settings.json` に追加：
 
 ```json
 {
   "statusLine": {
     "type": "command",
-    "command": "CC_THEME=dracula ~/.claude/scripts/cc-quadstat"
+    "command": "~/.claude/scripts/cc-quadstat"
   }
 }
 ```
+
+### CLIコマンド
+
+```bash
+# テーマ一覧を表示
+cc-quadstat --list-themes
+
+# テーマを変更
+cc-quadstat --set-theme dracula
+
+# ヘルプ
+cc-quadstat --help
+```
+
+テーマ設定は `~/.config/cc-quadstat/theme` に保存される。環境変数 `CC_THEME` でも上書き可能。
 
 ## Cerebrasでの開発体験
 
@@ -139,6 +160,25 @@ chmod +x ~/.claude/scripts/cc-quadstat
 - **rate limit**：課金してもレートエラーが発生
 
 完成まで**7ドル**かかった。結局、途中からClaude Codeに戻って仕上げた。
+
+やっぱり自分はAPI課金だと「今いくらかかってるんだろう」が気になってしまう。サブスクの方が精神的に安心して使える。
+
+## 既知の問題：built-in表示との競合
+
+Claude Code v2.1.x系のどこかで、組み込みのgit diff表示機能が追加されたようだ（changelogには記載なし）。
+
+これにより、cc-quadstatの出力の下にClaude Code側のgit diff情報が重複表示されるようになった。
+
+```
+ Opus 4.5  v2.1.9  ⎇ r (+9930,-7)      ← cc-quadstat（変更数表示）
+ 🧠 72%  ⏱ 5h: 8% (2h44m)
+ 📅 All: 18% (火19:59)  💬 Sonnet: 1%
+  21 files +9930 -7                      ← Claude Code built-in（重複）
+```
+
+現時点ではこのbuilt-in表示を無効にする設定オプションは存在しない。
+
+Feature Requestを作成済み：[#18475](https://github.com/anthropics/claude-code/issues/18475)
 
 ## まとめ
 
