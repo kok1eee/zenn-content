@@ -31,44 +31,72 @@ oh-my-opencodeという便利なプラグインがあったが、Claude Codeで�
 複雑なタスクは計画から：
 
 ```
-要件定義 → 設計 → タスク分解 → 実装
+要件定義 → ギャップ分析 → 設計 → タスク分解 → 実装
 ```
 
-`/plan` コマンドで一括実行できる。
+`/o-m-cc:plan` コマンドで一括実行できる。
 
 ## コマンド
 
 ### セットアップ
 
 ```bash
-# Sisyphus モードを有効化（CLAUDE.md に追記）
-/sisyphus
+# Sisyphus モードを有効化
+# （依存プラグイン確認 + CLAUDE.md設定 + hooks設定）
+/o-m-cc:sisyphus
 ```
 
 ### 計画フェーズ
 
 | コマンド | 説明 |
 |---------|------|
-| `/requirements <task>` | 要件定義 |
-| `/design` | 設計書作成 |
-| `/tasks` | タスク分解 |
-| `/plan <task>` | 上記を一括実行 |
+| `/o-m-cc:requirements <task>` | 要件定義 |
+| `/o-m-cc:design` | 設計書作成 |
+| `/o-m-cc:tasks` | タスク分解 |
+| `/o-m-cc:plan <task>` | 上記を一括実行（scout によるギャップ分析含む） |
+
+### 実行
+
+| コマンド | 説明 |
+|---------|------|
+| `/o-m-cc:ultrawork <task>` | 並列エージェントで最大パフォーマンス実行 |
+| `/o-m-cc:ultrawork-compact <task>` | /compact 後に ultrawork |
+| `/o-m-cc:ultrawork-clear <task>` | /clear 後に ultrawork |
 
 ### 品質
 
 ```bash
-# コードレビュー
-/review
+# コードレビュー（security-guidance連携 + code-simplifier提案）
+/o-m-cc:review
 ```
+
+## ワークフロー
+
+### /o-m-cc:plan の流れ
+
+```
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│  Phase 1     │───▶│  Phase 1.5   │───▶│  Phase 2     │───▶│  Phase 3     │───▶│  Phase 4     │
+│  要件定義    │    │  ギャップ    │    │  設計        │    │  タスク分解  │    │  レビュー    │
+│  (analyst)   │    │  (scout)     │    │  (designer)  │    │  (planner)   │    │  (critic)    │
+└──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
+```
+
+**Phase 1.5 (scout)** が特徴的：
+- Prometheus式インタビュー
+- **必ず質問で終わる**（パッシブ終了禁止）
+- 要件の漏れ・曖昧さを発見
+- Criticalな質問が解決するまで続行
 
 ## サブエージェント
 
-11個のエージェントを用途別に使い分け：
+12個のエージェントを用途別に使い分け：
 
 ### 計画系
 | Agent | 役割 |
 |-------|------|
 | @analyst | 現状分析・要件定義 |
+| @scout | ギャップ分析（Prometheus式インタビュー） |
 | @designer | アーキテクチャ設計 |
 | @planner | タスク分解 |
 | @critic | 計画レビュー |
@@ -87,6 +115,51 @@ oh-my-opencodeという便利なプラグインがあったが、Claude Codeで�
 | @frontend | UI/UXコンポーネント作成 |
 | @document-writer | ドキュメント作成 |
 | @code-reviewer | コードレビュー |
+
+## 依存プラグイン
+
+`/o-m-cc:sisyphus` 実行時に以下のプラグインを確認・インストール：
+
+| プラグイン | 用途 |
+|-----------|------|
+| ralph-wiggum | `<promise>DONE</promise>` までループ継続 |
+| frontend-design | フロントエンド設計支援 |
+| code-simplifier | コード簡素化（レビュー後提案） |
+| security-guidance | セキュリティレビュー支援 |
+
+## こだわったポイント
+
+### しっかりプランを作ってから一気にコードを作る
+
+cc-sddを参考に、いきなりコードを書かせない設計にした。
+
+```
+要件定義 → ギャップ分析 → 設計 → タスク分解 → 実装
+```
+
+計画フェーズをしっかり踏んでから実装に入るので、手戻りが少ない。
+
+### AskQuestionで終わるようにした
+
+一番こだわったのはここ。
+
+@scout エージェントは**必ず質問で終わる**ように設計した。「何か質問ありますか？」で終わるのではなく、具体的な質問を投げかけて終わる。
+
+これにより：
+- 要件の漏れを発見できる
+- 曖昧な部分を明確にできる
+- 実装前に認識のズレを防げる
+
+### /sisyphusコマンドでセットアップ
+
+インストーラーではなくpluginとして配布したかったので、セットアップ用の `/o-m-cc:sisyphus` コマンドを用意した。
+
+実行すると：
+- CLAUDE.md に Sisyphus 原則を追加
+- hooks 設定（`<promise>DONE</promise>` までループ）
+- 依存プラグインの確認・インストール
+
+意外と拡張性があって、OpenCodeにあるようなLSP機能（pyright-lsp、typescript-lsp）もインストールするようにしている。
 
 ## 使ってみた感想
 
@@ -113,29 +186,27 @@ Phase分け、並列可否、見積もり（S/M/L）まで出してくれる。
 
 ### 手離れが良い
 
-一度計画を承認したら、あとは「実装開始して」と言うだけ。TODO完了まで止まらずに進めてくれるので、他の作業をしながら待てる。
-
-## 今後やりたいこと
-
-- 「実装開始しますか？」でultraworkモードを選べるようにする
-  - 通常モード：確認しながら進める
-  - ultraworkモード：全部任せて一気に進める
+一度計画を承認したら、あとは「実装開始して」または `/o-m-cc:ultrawork` と言うだけ。TODO完了まで止まらずに進めてくれるので、他の作業をしながら待てる。
 
 ## インストール
 
 ```bash
-# プラグインをインストール
-claude plugin install kok1eee/o-m-cc
+# 1. marketplace 追加
+claude plugin marketplace add kok1eee/o-m-cc
 
-# Sisyphus モードを有効化
-/sisyphus
+# 2. プラグインインストール
+claude plugin install o-m-cc@kok1eee
+
+# 3. Sisyphus モードを有効化
+/o-m-cc:sisyphus
 ```
 
 ## まとめ
 
 - oh-my-opencodeが使えなくなったので自作
 - Sisyphus哲学でTODO完了まで止まらない
-- 仕様駆動開発で複雑なタスクも構造化
+- Prometheus式インタビューで要件の漏れを発見
+- ultraworkで並列エージェント実行
 
 GitHub: [kok1eee/o-m-cc](https://github.com/kok1eee/o-m-cc)
 
