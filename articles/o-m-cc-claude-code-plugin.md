@@ -65,22 +65,24 @@ LSPはOpenCodeを使っていてよかった部分。Claude Codeでも最近追�
 
 ### 計画フェーズ
 
-| コマンド | 説明 |
-|---------|------|
-| `/o-m-cc:requirements <task>` | 要件定義 |
-| `/o-m-cc:design` | 設計書作成 |
-| `/o-m-cc:tasks` | タスク分解 |
-| `/o-m-cc:plan <task>` | 上記を一括実行（scout によるギャップ分析含む） |
+| コマンド | 説明 | Context |
+|---------|------|---------|
+| `/o-m-cc:requirements <task>` | 要件定義 | - |
+| `/o-m-cc:design` | 設計書作成 | - |
+| `/o-m-cc:tasks` | タスク分解 | - |
+| `/o-m-cc:plan <task>` | 上記を一括実行（scout によるギャップ分析含む） | fork |
 
 AskQuestionでサジェストが出るようになっているので、次のコマンドを選びやすい。
 
 ### 実行
 
-| コマンド | 説明 |
-|---------|------|
-| `/o-m-cc:ultrawork <task>` | 並列エージェントで最大パフォーマンス実行 |
-| `/o-m-cc:ultrawork-compact <task>` | /compact 後に ultrawork |
-| `/o-m-cc:ultrawork-clear <task>` | /clear 後に ultrawork |
+| コマンド | 説明 | Context |
+|---------|------|---------|
+| `/o-m-cc:ultrawork <task>` | 並列エージェントで最大パフォーマンス実行 | fork |
+| `/o-m-cc:ultrawork-compact <task>` | /compact 後に ultrawork | fork |
+| `/o-m-cc:ultrawork-clear <task>` | /clear 後に ultrawork | fork |
+
+> **Context: fork** - サブエージェント実行時のコンテキスト汚染を防止。探索結果やレビュー詳細がメイン会話を汚さない。
 
 hooksではなくスラッシュコマンドでやっている。実行するとこんな感じ：
 
@@ -112,10 +114,9 @@ hooksではなくスラッシュコマンドでやっている。実行すると
 
 ### 品質
 
-```bash
-# コードレビュー（security-guidance連携 + code-simplifier提案）
-/o-m-cc:review
-```
+| コマンド | 説明 | Context |
+|---------|------|---------|
+| `/o-m-cc:review [files]` | コードレビュー（security-guidance連携 + code-simplifier提案） | fork |
 
 oh-my-opencodeだとDONEでそのまま終了だが、o-m-ccは実装完了後にコードレビューを挟む：
 
@@ -154,28 +155,33 @@ security-guidance や code-simplifier と連携して、問題があれば再度
 12個のエージェントを用途別に使い分け：
 
 ### 計画系
-| Agent | 役割 |
-|-------|------|
-| @analyst | 現状分析・要件定義 |
-| @scout | ギャップ分析（必ず質問で終わる） |
-| @designer | アーキテクチャ設計 |
-| @planner | タスク分解 |
-| @critic | 計画レビュー |
+| Agent | 役割 | Permission |
+|-------|------|------------|
+| @analyst | 現状分析・要件定義 | write |
+| @scout | ギャップ分析（必ず質問で終わる） | plan |
+| @designer | アーキテクチャ設計 | write |
+| @planner | タスク分解 | write |
+| @critic | 計画レビュー | plan |
 
 ### 分析系
-| Agent | 役割 |
-|-------|------|
-| @advisor | デバッグ・戦略相談 |
-| @researcher | ドキュメント調査 |
-| @explore | 高速コード探索 |
-| @vision | PDF/画像分析 |
+| Agent | 役割 | Permission |
+|-------|------|------------|
+| @advisor | デバッグ・戦略相談 | plan |
+| @researcher | ドキュメント調査 | plan |
+| @explore | 高速コード探索 | plan |
+| @vision | PDF/画像分析 | plan |
 
 ### 実装・品質系
-| Agent | 役割 |
-|-------|------|
-| @frontend | UI/UXコンポーネント作成 |
-| @document-writer | ドキュメント作成 |
-| @code-reviewer | コードレビュー |
+| Agent | 役割 | Permission |
+|-------|------|------------|
+| @frontend | UI/UXコンポーネント作成 | write |
+| @document-writer | ドキュメント作成 | write |
+| @code-reviewer | コードレビュー | default |
+
+> **Permission**:
+> - `plan`: 読み取り専用モード。権限確認なしで高速動作
+> - `write`: 書き込み可能（Write/Edit ツール使用）
+> - `default`: Bashなど特殊ツール使用のため標準権限
 
 ## 依存プラグイン
 
