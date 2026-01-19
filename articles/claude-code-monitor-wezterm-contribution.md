@@ -100,10 +100,26 @@ $ echo $WEZTERM_PANE
 $ wezterm cli activate-pane --pane-id $WEZTERM_PANE
 ```
 
+## o-m-ccとの相性が良い
+
+自分が作った[o-m-cc](https://github.com/kok1eee/o-m-cc)との相性が良いと思った。
+
+o-m-ccのSisyphusモードは、1つのタスクを完了するまでずっとやり続けてくれる。人間の介入が最小限で済むので、**Claude Codeの並列化がしやすい**。
+
+```
+WezTerm
+├── ペイン1: Claude Code + o-m-cc (タスクA)  ← 放置OK
+├── ペイン2: Claude Code + o-m-cc (タスクB)  ← 放置OK
+├── ペイン3: Claude Code + o-m-cc (タスクC)  ← 放置OK
+└── ペイン4: ccm watch  ← ここで全体を監視
+```
+
+こういうのが欲しかったし、作りたかった。ccmのおかげで実現できた。
+
 ## まとめ
 
 - **claude-code-monitor**: 複数セッション監視に必須
-- **Zedの内蔵ターミナル**: ccmのフォーカス切替が使えない
+- **o-m-cc**: Sisyphusモードで放置できる並列実行
 - **WezTerm + LazyVim**: ccmをフル活用できる構成に移行
 
 Claude Codeを複数並行で動かすなら、ccmは入れておいて損はない。
