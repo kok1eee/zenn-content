@@ -3,7 +3,7 @@ title: "Claude Code複数セッション監視ツールが便利すぎてWezTerm
 emoji: "🖥️"
 type: "tech"
 topics: ["claudecode", "wezterm", "zed", "terminal"]
-published: false
+published: true
 ---
 
 ## はじめに

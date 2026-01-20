@@ -3,7 +3,7 @@ title: "Cerebras × GLM-4.7でClaude Code用ステータスラインを爆速開
 emoji: "⚡"
 type: "tech"
 topics: ["claudecode", "cerebras", "go", "cli"]
-published: false
+published: true
 ---
 
 ## はじめに
@@ -179,6 +179,14 @@ Claude Code v2.1.x系のどこかで、組み込みのgit diff表示機能が追
 現時点ではこのbuilt-in表示を無効にする設定オプションは存在しない。
 
 Feature Requestを作成済み：[#18475](https://github.com/anthropics/claude-code/issues/18475)
+
+## あとがき
+
+この記事を書いてからしばらく放置していた。別のツール（o-m-cc）を作り始めてしまったので。
+
+でも使い続けていたら、体感がわりと良かった。4分割で作業しているときに「今どのくらい使ったっけ」がパッと見えるのは便利。
+
+せっかく作ったので共有。
 
 ## まとめ
 

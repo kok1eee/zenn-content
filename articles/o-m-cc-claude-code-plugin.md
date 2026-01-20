@@ -357,6 +357,12 @@ ultrawork 完了時に `.plan/handoff.yaml` が自動生成される。
 
 プラグインの構造上、skillとの連携が自然にできる。
 
+### Agent Skills Marketplace
+
+https://izanami.dev
+
+GitHubからClaude Code用のスキルを65,000個以上集めたマーケットプレイス。面白そうなスキルがあれば、o-m-ccのエージェントに組み込んでいく予定。
+
 ## まとめ
 
 - oh-my-opencodeが使えなくなるかもしれないので自作
