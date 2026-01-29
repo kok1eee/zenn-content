@@ -1,5 +1,5 @@
 ---
-title: "Claude Code の spinnerVerbs でシーシュポスが岩を押し上げるようになった"
+title: "Claude Code 2.1.23 でスピナーの表示が変更できるようになった"
 emoji: "🪨"
 type: "tech"
 topics: ["claudecode", "ai", "cli", "tips"]
@@ -8,27 +8,30 @@ published: true
 
 ## はじめに
 
-Claude Code 2.1.23 で `spinnerVerbs` という設定が追加された。処理中のスピナー表示をカスタマイズできる。
+> 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。
 
-ただし**公式ドキュメントには記載がない**。バイナリを解析して正しいフォーマットを見つけた。
-
-## デフォルトの表示
+Claude Code 2.1.23 で `spinnerVerbs` という設定が追加された。処理中に表示されるスピナーのテキストをカスタマイズできる。
 
 ```
+// デフォルト
 ⏳ Thinking...
 ⏳ Working...
 ⏳ Processing...
+
+// カスタム
+⏳ 岩を押し上げています...
+⏳ 神々に抗っています...
 ```
 
-## 正しいフォーマット
+## 設定方法
 
-`~/.claude/settings.json` に追加：
+`~/.claude/settings.json` に追加する。
 
 ```json
 {
   "spinnerVerbs": {
     "mode": "replace",
-    "verbs": ["カスタム表示1", "カスタム表示2"]
+    "verbs": ["表示テキスト1", "表示テキスト2", "表示テキスト3"]
   }
 }
 ```
@@ -38,12 +41,14 @@ Claude Code 2.1.23 で `spinnerVerbs` という設定が追加された。処理
 | mode | 説明 |
 |------|------|
 | `"replace"` | デフォルトを完全に置き換え |
-| `"append"` | デフォルトに追加 |
+| `"append"` | デフォルトに追加（既存 + カスタム） |
 
-### 注意：配列ではなくオブジェクト
+### ハマりポイント：配列ではなくオブジェクト
+
+直感的に配列で書きたくなるが、エラーになる。
 
 ```json
-// ❌ これはエラーになる
+// ❌ エラー
 {
   "spinnerVerbs": ["Thinking", "Working"]
 }
@@ -53,6 +58,8 @@ Claude Code 2.1.23 で `spinnerVerbs` という設定が追加された。処理
 spinnerVerbs: Expected object, but received array
 Files with errors are skipped entirely, not just the invalid settings.
 ```
+
+正しくはオブジェクトで `mode` と `verbs` を指定する。
 
 ```json
 // ✅ 正しい形式
@@ -64,11 +71,31 @@ Files with errors are skipped entirely, not just the invalid settings.
 }
 ```
 
-## Sisyphus スピナー
+## 公式ドキュメントにはまだない
 
-[o-m-cc](https://github.com/kok1eee/o-m-cc) は「タスク完了まで止まらない」Sisyphus 哲学を Claude Code に注入するプラグイン。
+2.1.23 の Changelog には `Added customizable spinner verbs setting (spinnerVerbs)` と書いてあるが、設定ページには記載がない。
 
-スピナーも世界観に合わせた。
+[GitHub issue #21599](https://github.com/anthropics/claude-code/issues/21599) でもドキュメント不足が報告されている。
+
+### フォーマットの見つけ方
+
+バイナリを直接解析して見つけた。
+
+```bash
+strings $(which claude) | grep "spinnerVerb"
+```
+
+```
+spinnerVerbs: Customize spinner verbs ({ "mode": "append" | "replace", "verbs": [...] })
+```
+
+## o-m-cc で実際にやってみた
+
+自分が作っている Claude Code 用のオーケストレータープラグイン [o-m-cc](https://github.com/kok1eee/o-m-cc) で実際に設定してみた。
+
+o-m-cc は「Sisyphus Loop」という思想で動いている。ギリシャ神話のシーシュポス — 永遠に岩を山頂に押し上げ続ける男。タスクが完了するまで止まらない。
+
+スピナーもこの世界観に合わせた。
 
 ```json
 {
@@ -99,43 +126,19 @@ Files with errors are skipped entirely, not just the invalid settings.
 ⏳ 神々に抗っています...
 ```
 
-シーシュポスが永遠に岩を押し上げ続ける神話そのまま。Claude が処理中も止まらずに岩を押し上げている。
+Claude が考えている間もシーシュポスが岩を押し上げている。かわいい。
 
-## フォーマットの見つけ方
+### /init で自動設定
 
-公式ドキュメントに記載がなかったので、バイナリを直接解析した：
-
-```bash
-strings $(which claude) | grep "spinnerVerb"
-```
-
-出力：
-
-```
-spinnerVerbs: Customize spinner verbs ({ "mode": "append" | "replace", "verbs": [...] })
-```
-
-[GitHub issue #21599](https://github.com/anthropics/claude-code/issues/21599) でもドキュメント不足が報告されている。
-
-## o-m-cc の /init で自動設定
-
-o-m-cc プラグインの `/o-m-cc:init` コマンドで、Sisyphus スピナーを自動設定できる。
-
-```
-質問: Sisyphus スピナーを設定しますか？
-1. 設定する（推奨）
-2. スキップ
-```
-
-「設定する」を選ぶと `~/.claude/settings.json` に自動追加。既に設定済みなら上書きしない。
+o-m-cc の `/o-m-cc:init` コマンドにも組み込んだ。プロジェクト初期化時に「Sisyphus スピナーを設定しますか？」と聞いて、選択すると `~/.claude/settings.json` に自動追加される。既に設定済みなら上書きしない。
 
 ## まとめ
 
-- `spinnerVerbs` は 2.1.23 で追加された公式未ドキュメント設定
+- Claude Code 2.1.23 で `spinnerVerbs` が追加された
 - フォーマットは `{ "mode": "replace" | "append", "verbs": [...] }`
-- 配列ではなくオブジェクトで指定（配列だとエラー）
+- 配列ではなくオブジェクト（ハマりポイント）
+- 公式ドキュメントはまだない（バイナリ解析で発見）
 - 日本語も使える
-- o-m-cc では Sisyphus の世界観に合わせたスピナーを `/init` で自動設定
 
 GitHub: [kok1eee/o-m-cc](https://github.com/kok1eee/o-m-cc)
 
