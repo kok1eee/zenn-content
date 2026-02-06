@@ -3,7 +3,7 @@ title: "Opus 4.6 の Agent Teams でマルチエージェントオーケスト�
 emoji: "🤝"
 type: "tech"
 topics: ["claudecode", "ai", "cli", "multiagent", "opus"]
-published: false
+published: true
 ---
 
 ## はじめに
