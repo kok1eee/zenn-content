@@ -59,6 +59,25 @@ teammates は**互いにメッセージを送り合える**。議論して、よ
 
 > 参考: [Orchestrate teams of Claude Code sessions](https://code.claude.com/docs/en/agent-teams)
 
+### エージェント定義ファイルの役割
+
+よくある誤解として「agents/*.md ファイルが直接仕事をする」と思われがちだが、実際は違う。
+
+```
+agents/code-reviewer.md  ← 設計図（プロンプト定義）
+        │
+        │ spawnTeammate 時に読み込み
+        ▼
+  新しいサブプロセス  ← .md の内容がシステムプロンプトとして注入される
+```
+
+- `agents/*.md` は**エージェントの設計図**。tools、model、振る舞いの指示を定義している
+- `spawnTeammate` で spawn すると、**毎回新しいサブプロセス**が立ち上がる
+- `.md` の内容が**システムプロンプトとして注入**され、そのエージェントの人格と能力が決まる
+- teammate が終了すればサブプロセスも消える。次に spawn すれば新しいインスタンスが生まれる
+
+つまり `.md` ファイルはクラス定義、spawn がインスタンス化。同じ `.md` から何人でも teammate を作れる（debugger × 3 で仮説競合、など）。
+
 ## 有効化
 
 Agent Teams はデフォルト無効。
