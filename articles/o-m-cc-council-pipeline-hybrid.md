@@ -14,6 +14,8 @@ published: false
 
 前回の v0.8.0 で Agent Teams (TeammateTool) に全面移行した。エージェント同士が peer-to-peer でメッセージを送り合えるようになったが、実は `/plan` のフローは「並列だけど会話しない」状態だった。これを「同じ問題を多角的に同時分析し、peer-to-peer で議論する」Council パターンに変えた。
 
+まだ主に自分用だが、マルチエージェントの設計パターンとして参考になれば。
+
 https://zenn.dev/kok1eee/articles/claude-opus-46-agent-teams-teammatetool
 
 https://zenn.dev/kok1eee/articles/o-m-cc-claude-code-plugin
