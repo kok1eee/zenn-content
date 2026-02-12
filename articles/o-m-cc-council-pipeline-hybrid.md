@@ -3,7 +3,7 @@ title: "Agent Teams に Council パターンを導入して計画フェーズを
 emoji: "🏛️"
 type: "tech"
 topics: ["claudecode", "ai", "multiagent", "plugin", "automation"]
-published: false
+published: true
 ---
 
 ## はじめに
