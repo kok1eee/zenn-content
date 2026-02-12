@@ -22,7 +22,11 @@ https://zenn.dev/kok1eee/articles/o-m-cc-claude-code-plugin
 
 ## Council パターンとは
 
-Anthropic のブログ「[Building effective agents](https://www.anthropic.com/engineering/building-effective-agents)」で紹介されているマルチエージェントパターンの一つ。
+以下の記事で「Councils of Agents」というパターンを知った。
+
+https://theengineeringmanager.substack.com/p/councils-of-agents
+
+Agent Teams の peer-to-peer メッセージングと相性が良いのではないかと思い、o-m-cc に導入してみた。元々は Anthropic のブログ「[Building effective agents](https://www.anthropic.com/engineering/building-effective-agents)」でも紹介されているマルチエージェントパターンの一つ。
 
 ### Pipeline（従来）
 
@@ -316,6 +320,7 @@ GitHub: [kok1eee/o-m-cc](https://github.com/kok1eee/o-m-cc)
 
 ## 参考
 
+- [Councils of Agents](https://theengineeringmanager.substack.com/p/councils-of-agents) - Council パターンの着想元
 - [Building effective agents](https://www.anthropic.com/engineering/building-effective-agents) - Anthropic のエージェント設計パターン
 - [Orchestrate teams of Claude Code sessions](https://code.claude.com/docs/en/agent-teams) - Agent Teams 公式ドキュメント
-- [Claude Code tips from Boris Cherry](https://x.com/AiDeveloperTips) - Default Agent, パーミッション事前承認の着想元
+- [Claude Code tips from Boris Cherny](https://x.com/bcherny/status/2021700144039903699) - Default Agent, パーミッション事前承認の着想元
