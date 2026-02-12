@@ -318,6 +318,76 @@ Council パターンのポイント:
 
 GitHub: [kok1eee/o-m-cc](https://github.com/kok1eee/o-m-cc)
 
+## 後書き: v0.12.0 で大掃除した
+
+この記事を書いた後、v0.12.0 でプラグイン全体を大幅に整理した。Claude と一つ一つ「これ使ってる？」と確認しながら、不要なものを削っていった。
+
+### 削除したもの
+
+| カテゴリ | 削除 | 理由 |
+|---------|------|------|
+| ディレクトリ | `spec/standards/`, `spec/steering/`, `spec/rules/` | CLAUDE.md が唯一のソースで十分 |
+| エージェント | `code-simplifier`, `document-writer` | Lead が直接やれる / 外部 plugin で代替 |
+| コマンド | `/ultrawork`, `/requirements`, `/design`, `/tasks` | `/plan` に統合 / capabilities.md ディスパッチで代替 |
+| テンプレート | `orchestration.yml` | native task system (TaskCreate/TaskUpdate) で代替 |
+| hooks | `suggest-agent.sh`, `agent-rules.json` | capabilities.md のキーワード表で代替 |
+| 機能 | `spec/plan/logs/` エージェントログ | メッセージで返せば十分 |
+
+エージェント 16 → 14、コマンド 10 → 7、hooks エントリ 11 → 9。
+
+### ディレクトリ構造の変更
+
+`spec/` という名前がもう実態と合わなくなっていた。中身は plan ファイルとランタイム状態だけ。
+
+```
+# Before
+spec/
+├── plan/          # 計画ファイル
+├── standards/     # 技術規約（v0.11.0 で廃止済み）
+├── steering/      # プロジェクト文脈（v0.11.0 で廃止済み）
+├── verify.json    # ランタイム設定
+└── sisyphus-state.json  # ランタイム状態
+
+# After
+plan/              # プロジェクトルートに昇格
+.claude/           # ランタイム状態はここに
+```
+
+計画ファイルは `plan/` としてルートに。ランタイム状態は `.claude/` に。`spec/` ディレクトリ自体が消えた。
+
+### 整理の判断基準
+
+一つ一つ確認していく中で、自然と判断基準が見えてきた:
+
+1. **二重管理になっていないか** — suggest-agent.sh と capabilities.md、orchestration.yml と native task system
+2. **Lead が直接やれないか** — document-writer は Lead でドキュメントが書ける、code-simplifier は外部 plugin で代替
+3. **個別コマンドが本当に個別で使われるか** — `/requirements`, `/design`, `/tasks` は常に `/plan` 経由だった
+4. **名前が実態を反映しているか** — `spec/` はもう仕様を管理していない
+
+残ったものは全部ちゃんと使われている状態になった。**-1,872 行の削除**。追加より削除の方が気持ちいい。
+
+### 宙ぶらりんだったスキル昇格が自動化に乗った
+
+[Shogun](https://github.com/shogun-toolbox/shogun) などのプラグインに憧れて、学びをスキルに昇格させる `/promote` コマンドを作っていた。「繰り返すパターンを見つけたらエージェントやルールに昇格させよう」というアイデア自体は良かったが、実際には手動で呼ぶ機会がなく宙ぶらりんだった。
+
+転機は HANDOVER.md の仕組みを整えたこと。セッション終了時に Stop hook (`generate-handover.sh`) が自動で引き継ぎ書を生成し、VCS にコミットされる。すると HANDOVER.md の VCS 履歴が自然に蓄積される。
+
+ここに `promote-checker.sh` を Stop hook として追加した:
+
+```
+セッション終了
+  ↓
+generate-handover.sh → HANDOVER.md を自動生成
+  ↓
+promote-checker.sh → VCS 履歴を横断検索
+  ↓
+繰り返しパターンを検出 → 「/promote でスキル昇格を検討してください」と提案
+```
+
+手動で「学びを記録して」→「パターンを探して」→「スキルにして」とやっていたものが、**セッションを終了するだけで自動的に回る**ようになった。handover の自動化という土台があったからこそ、宙ぶらりんだった promote が自然な形でフローに組み込めた。
+
+機能を足すより、既存の自動化チェーンに乗せる方がうまくいく。
+
 ## 参考
 
 - [Councils of Agents](https://theengineeringmanager.substack.com/p/councils-of-agents) - Council パターンの着想元
