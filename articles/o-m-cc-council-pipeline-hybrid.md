@@ -218,6 +218,10 @@ TeammateTool: spawnTeammate
 
 v0.10.0 ではもう一つ大きな変更がある。**デフォルトエージェント**の導入。
 
+Claude Code の作者の一人、Boris Cherny さんのツイートでこの機能を知った。
+
+https://x.com/bcherny/status/2021700144039903699
+
 Claude Code には `settings.json` の `"agent"` フィールドでデフォルトエージェントを設定する機能がある。メイン会話がそのエージェントの指示で動く。
 
 ### 何が嬉しいか
