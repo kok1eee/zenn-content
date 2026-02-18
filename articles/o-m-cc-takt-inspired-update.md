@@ -3,7 +3,7 @@ title: "外部エンジン vs Claude Code ネイティブ — TAKT と o-m-cc �
 emoji: "🎵"
 type: "tech"
 topics: ["claudecode", "ai", "multiagent", "plugin", "takt"]
-published: false
+published: true
 ---
 
 ## はじめに
