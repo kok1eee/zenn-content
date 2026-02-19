@@ -97,6 +97,9 @@ wez-sidebar dock
 
 ペイン分割で常駐させるのが基本的な使い方。セッションの状態がリアルタイムで更新される。
 
+![サイドバー常駐](/images/wez-sidebar-macbook.png)
+*4ペイン + 右サイドバーの構成*
+
 ```lua
 -- wezterm.lua
 config.keys = {
@@ -126,7 +129,7 @@ config.keys = {
 
 常駐させず、必要なときだけoverlayとして起動することもできる。
 
-![WezTerm overlay](/images/wez-sidebar-overlay.png)
+![WezTerm overlay](/images/wez-sidebar-sidebar.png)
 *overlayとして起動すれば、ペインを分割せずに済む*
 
 ```lua
@@ -138,6 +141,11 @@ config.keys = {
   }),
 }
 ```
+
+ちなみに同じ仕組みで[Yazi](https://github.com/sxyazi/yazi)（Rust製ファイルマネージャ）もoverlayで起動すると便利。ターミナル内で完結するので相性がいい。
+
+![Yazi overlay](/images/wez-sidebar-overlay.png)
+*YaziもWezTermのoverlayで快適に使える*
 
 ## セットアップ
 
