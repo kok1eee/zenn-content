@@ -97,9 +97,6 @@ wez-sidebar dock
 
 ペイン分割で常駐させるのが基本的な使い方。セッションの状態がリアルタイムで更新される。
 
-![サイドバー常駐](/images/wez-sidebar-macbook.png)
-*4ペイン + 右サイドバーの構成*
-
 ```lua
 -- wezterm.lua
 config.keys = {
