@@ -10,13 +10,23 @@ published: false
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。
 
-Claude Codeを複数セッション並行で動かすのが当たり前になってきた。4〜6セッション同時に走らせていると、こういう課題が出てくる。
+以前、claude-code-monitorに感動してWezTermをメインにした話を書いた。
 
-- どのセッションが動いてる？止まってる？入力待ち？
-- APIの使用量、あとどれくらい余裕ある？
-- あのセッションのペインに切り替えたい
+https://zenn.dev/kok1eee/articles/claude-code-monitor-wezterm-contribution
 
-これを解決するために**wez-sidebar**というTUIツールを作った。WezTermのサイドバーまたはドックとして常駐し、Claude Codeの状態をリアルタイムで監視する。
+その後、「IDEでClaude Code動かすな」という海外トレンドに乗っかって、Zed + ターミナル派の話も書いた。
+
+https://zenn.dev/kok1eee/articles/claude-code-zed-terminal-workflow
+
+WezTermに移行してからは並列セッション数がさらに増えた。4〜6セッション同時に走らせていると、ccmのセッション監視だけでは足りなくなってきた。
+
+- API使用量、あとどれくらい余裕ある？
+- タスクの進捗を一目で把握したい
+- WezTermの**同じウィンドウ内**で完結させたい（別ウィンドウじゃなく）
+
+ccmは素晴らしいツールだけど、自分のワークフローに合わせてカスタマイズしたくなった。
+
+そこで**wez-sidebar**を作った。WezTermのサイドバーまたはドックとして常駐し、Claude Codeの状態をリアルタイムで監視する。
 
 https://github.com/kok1eee/wez-sidebar
 
