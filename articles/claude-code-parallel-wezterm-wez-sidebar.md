@@ -190,12 +190,12 @@ cp config.example.toml ~/.config/wez-sidebar/config.toml
 ```
 
 ```toml
-# タスク表示を有効にする場合
-tasks_file = "~/.config/wez-sidebar/tasks-cache.json"
+# タスク表示（アンビエントエージェントが同期したキャッシュを読み込む）
+tasks_file = "~/.config/ambient-task-agent/tasks-cache.json"
 task_filter_name = "Your Name"
 
-# hookを外部コマンドに委譲する場合
-# hook_command = "ambient-task-agent hook"
+# hookをアンビエントエージェントに委譲
+hook_command = "ambient-task-agent hook"
 ```
 
 ## 仕組み
