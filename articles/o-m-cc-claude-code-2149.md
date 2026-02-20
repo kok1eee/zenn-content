@@ -12,7 +12,7 @@ published: false
 
 Claude Code 2.1.49 のリリースノートを読んでいたら、自作プラグイン [o-m-cc](https://github.com/kok1eee/o-m-cc) に関係しそうな機能が3つあった。
 
-- プラグインが `settings.json` をシップできるようになった
+- プラグインに `settings.json` を同梱できるようになった
 - エージェント定義に `background: true` を追加できるようになった
 - エージェント定義に `isolation: "worktree"` を追加できるようになった
 
@@ -24,7 +24,7 @@ https://zenn.dev/kok1eee/articles/o-m-cc-takt-inspired-update
 
 ## 3つの新機能
 
-### 1. プラグインが settings.json をシップ
+### 1. プラグインに settings.json を同梱
 
 **何ができるか**: プラグインのインストール時にデフォルト設定を自動で提供できる。
 
