@@ -3,7 +3,7 @@ title: "Claude Code の記憶設計 — auto-memory と HANDOVER.md の役割分
 emoji: "🧠"
 type: "tech"
 topics: ["claudecode", "ai", "plugin", "automation"]
-published: false
+published: true
 ---
 
 ## はじめに
