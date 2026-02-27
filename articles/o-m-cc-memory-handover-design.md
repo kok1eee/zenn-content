@@ -10,7 +10,9 @@ published: false
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。
 
-自作の Claude Code プラグイン [o-m-cc](https://github.com/kok1eee/o-m-cc) で、ナレッジ管理の仕組みを大幅に見直した。v0.15〜v0.17 にかけて、独自のナレッジ管理を廃止して Claude Code の auto-memory に移行し、その後で HANDOVER.md を軽量版として復活させた。
+Claude Code コミュニティで HANDOVER.md（セッション引き継ぎ書）が少し流行った。セッション終了時に「今やっていたこと」を書き残して、次のセッションで読み込む。シンプルだが効果的なアイデアで、自分もいいと思って自作の Claude Code プラグイン [o-m-cc](https://github.com/kok1eee/o-m-cc) に取り入れた。
+
+そこから発展させて HANDOVER.md の VCS 管理、履歴マイニング、自動スキル昇格と独自のナレッジ管理を作り込んだが、v0.17 でそれを全部捨てて auto-memory に移行し、HANDOVER.md を軽量版として復活させた。
 
 「一回全部捨てて、必要なものだけ戻す」という流れだった。
 
