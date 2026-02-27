@@ -1,5 +1,5 @@
 ---
-title: "Claude Code の記憶はどう設計すべきか — auto-memory の実践と限界、補完手法"
+title: "Claude Code の auto-memory とセッション引き継ぎを設計する"
 emoji: "🧠"
 type: "tech"
 topics: ["claudecode", "ai", "automation", "tips"]
