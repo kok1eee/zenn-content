@@ -1,5 +1,5 @@
 ---
-title: "Claude Code の記憶設計 — auto-memory と HANDOVER.md の役割分担"
+title: "Claude Code の記憶設計 — HANDOVER.md が使えなかったので Entire.io を参考に作り直した"
 emoji: "🧠"
 type: "tech"
 topics: ["claudecode", "ai", "plugin", "automation"]
@@ -10,214 +10,192 @@ published: true
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。
 
-Claude Code コミュニティで HANDOVER.md（セッション引き継ぎ書）が少し流行った。セッション終了時に「今やっていたこと」を書き残して、次のセッションで読み込む。シンプルだが効果的なアイデアで、自分もいいと思って自作の Claude Code プラグイン [o-m-cc](https://github.com/kok1eee/o-m-cc) に取り入れた。
+Claude Code コミュニティで HANDOVER.md（セッション引き継ぎ書）が流行った。セッション終了時に「今やっていたこと」を書き残して、次のセッションで読み込む。シンプルだが効果的なアイデアで、自分も自作の Claude Code プラグイン [o-m-cc](https://github.com/kok1eee/o-m-cc) に取り入れた。
 
-そこから発展させて HANDOVER.md の VCS 管理、履歴マイニング、自動スキル昇格と独自のナレッジ管理を作り込んだが、v0.17 でそれを全部捨てて auto-memory に移行し、HANDOVER.md を軽量版として復活させた。
+だが、うまく使えなかった。
 
-「一回全部捨てて、必要なものだけ戻す」という流れだった。
+情報が足りないか、多すぎるか。1ファイルに蓄積していくと肥大化する。かといって毎回上書きすると前の経緯が消える。VCS で履歴管理してみたが、コミットログが HANDOVER.md の更新で埋まる。削除しようかと思った。
+
+ただ、以前から気になっていた [Entire.io](https://entire.io) と [Agent Trace](https://github.com/cursor/agent-trace) の設計を改めて読み込んでみたら、「捨てる」のではなく「作り直す」方向が見えた。
 
 前回の記事:
 
 https://zenn.dev/kok1eee/articles/o-m-cc-claude-code-2149
 
-## 背景：旧版の問題
+## HANDOVER.md の何がダメだったか
 
-v0.14 までの o-m-cc には、独自のナレッジ管理機構があった。
+### 1. 何を書けばいいかわからない
+
+「セッションの引き継ぎ書を書け」だけでは、Claude が何を書くかはセッションの内容次第。ある時は詳細すぎ、ある時は肝心なことが抜ける。**構造が決まっていない**のが問題だった。
+
+### 2. 1ファイルに詰め込みすぎ
+
+当初は1ファイルに Snapshot を蓄積していた。5件溜まったらダイジェストに統合するロジックも入れた。だが、このファイルは SessionStart で毎回フルロードされる。肥大化するほどトークンを食う。
 
 ```
-HANDOVER.md（VCS 管理）
-  → セッション終了時に自動生成
-  → jj で履歴管理
-  → learnings-researcher が VCS 履歴をマイニング
-  → promote-checker が繰り返しパターンを検出
-  → スキルに自動昇格
+HANDOVER.md（蓄積型）
+  → Snapshot 1
+  → Snapshot 2
+  → ...
+  → Snapshot 5 → ダイジェストに統合
+  → Snapshot 6...
+  → 際限なく膨らむ
 ```
 
-一見よくできているが、3つの問題があった。
+### 3. VCS 管理が裏目に出た
 
-### 1. VCS 管理が重い
-
-HANDOVER.md を VCS で管理していた理由は、`learnings-researcher` エージェントが過去の履歴を掘り返して知見を抽出するため。しかし実際には：
+履歴を掘り返して知見を抽出する `learnings-researcher` エージェントを作ったが、実際には：
 
 - 履歴が増えるほど検索が遅くなる
 - 抽出された「知見」の質が安定しない
 - コミットログが HANDOVER.md の更新で埋まる
 
-### 2. 自動スキル昇格が過剰
+VCS 管理は「情報を失いたくない」という心理から来ていたが、**本当に価値のある知識は Claude Code の auto-memory に自然に蓄積される**。履歴管理の仕組みを自前で持つ必要はなかった。
 
-v0.13 で導入した自動スキル昇格は、[Shogun](https://github.com/shogun-toolbox/shogun) 等の自動スキル昇格の仕組みに憧れて作ったものだった。「繰り返しパターンを自動検出→スキル化」という仕組み。しかし実際に運用してみると、スキルを作るかどうかは人間が判断すべき問題だった。大事なパターンは auto-memory に記録されていれば Claude が上手に使ってくれる。わざわざスキルとして固定する必要はない。
+## 参考にしたもの
 
-### 3. Claude Code 自身がやってくれる
+Entire.io も Agent Trace も以前から知っていた。ただ「自分のプラグインにどう活かすか」を考えたのは、HANDOVER.md を削除しようとしたこのタイミングが初めてだった。
 
-Claude Code に `auto-memory` が実装された。セッション中に学んだパターンや慣習を `.claude/projects/*/memory/MEMORY.md` に自動で蓄積してくれる。つまり、**o-m-cc が独自に作っていたものと同じことを Claude Code 本体がやるようになった**。
+### Entire.io — AI セッションの構造化
 
-## やったこと：全部捨てた
+[Entire.io](https://entire.io) は元 GitHub CEO の Thomas Dohmke が作った AI-native version control ツール。Git を置き換えるのではなく、Git の上に「AI の思考過程」を記録するレイヤーを被せる。
 
-v0.17 で以下を廃止した。
+Entire.io が面白いのは、Checkpoint（AI セッションの記録単位）ごとに **AI サマリーを自動生成**する点。そのサマリーが以下の軸で構造化されている。
 
-| 廃止したもの | 理由 |
-|-------------|------|
-| HANDOVER.md の VCS 管理 | auto-memory が知識蓄積を担う |
-| learnings-researcher | VCS 履歴マイニング不要 |
-| promote-checker | 自動スキル昇格は過剰 |
-| skill-candidates.md | 同上 |
+- **Intent** — 何をしようとしていたか
+- **Outcome** — 何が達成されたか
+- **Learnings** — 何がわかったか
+- **Friction** — 何にハマったか
+- **Open Items** — 何が残っているか
 
-廃止後の構成はシンプルになった。
+改めて読み込んで「**セッションの記録に必要なのは、自由記述ではなく固定された軸だ**」と腹落ちした。
 
-```
-auto-memory (MEMORY.md)  — 長期知識（パターン、慣習）
-CLAUDE.md                — プロジェクトルール
-```
+### Agent Trace — コードと文脈の紐付け
 
-## 廃止して気づいた2つのギャップ
+[Agent Trace](https://github.com/cursor/agent-trace) は AI 生成コードの帰属（attribution）を記録するオープン仕様。「このコードは誰が（人間 or AI）、どの会話で、どのモデルを使って書いたか」をファイル・行レベルで追跡する。
 
-全部捨てて動かしてみると、2つのギャップが見つかった。
+直接使うわけではないが、**コードだけ保存して文脈を捨てるのは、後から見たとき「なぜこうなったか」がわからない**という Provenance Gap の問題提起を、改めて自分の HANDOVER.md に当てはめてみた。解決すべきなのはまさにこれだった。
 
-### ギャップ1: compaction による記憶喪失
+## 作り直し：3層アーキテクチャ
 
-Claude Code はコンテキストウィンドウが上限に近づくと `auto-compaction` を実行する。古いメッセージを要約して圧縮する仕組みだが、**作業中の文脈（目標、進捗、判断の経緯）が圧縮で失われる**。
+Entire.io の構造化サマリーと、「文脈を捨てない」という Agent Trace の思想を組み合わせて、HANDOVER.md を3層に再設計した。
+
+### ファイル構成
 
 ```
+.claude/
+├── context.md          ← 最新1スナップショットのみ（常にロード）
+├── chronicle.md        ← 直近30エントリの1行ダイジェスト
+└── context-archive.md  ← 全量保管（読み込まない）
+```
+
+**context.md** は常に最新1つだけ。SessionStart で即座に読める。前のスナップショットは chronicle.md に1行に圧縮して退避される。chronicle.md が30件を超えたら、古いものが archive に落ちる。
+
+### データフロー
+
+```
+compaction 発生（自動）
+  → 既存 Snapshot を chronicle に1行圧縮して退避
+  → chronicle が 30 超過なら archive に退避
+  → context.md を新しい Snapshot で上書き
+
+/o-m-cc:handover（手動）
+  → 4軸で詳細な引き継ぎ書を生成
+  → Learnings を MEMORY.md に反映
+  → 繰り返しパターンがあれば Skill 提案
+
 セッション開始
-  → 複雑なタスクに着手
-  → 途中で compaction 発生
-  → 「何をやっていたか」が曖昧になる
-  → 同じ調査を繰り返す
+  → context.md の最新状態を表示
+  → chronicle.md の直近5件を表示
 ```
 
-auto-memory は長期知識を保存するが、「今このセッションで何をやっているか」というセッション状態は保存しない。
+### 4軸の構造
 
-### ギャップ2: cross-session の引き継ぎ
+Entire.io の5軸から Open Items を Next Steps に読み替えて、Changed Files を追加。
 
-新しいセッションで「前回の続き」をやるとき、auto-memory だけでは不十分。MEMORY.md には「このプロジェクトは React + TypeScript で書かれている」のような知識はあるが、「昨日、認証機能のリファクタリングを半分まで進めて、残りは XYZ」のようなセッション状態はない。
+| 軸 | 内容 |
+|---|---|
+| **Intent** | このセッションで何をしようとしていたか |
+| **Outcomes** | 何が完了したか |
+| **Learnings** | 確定した設計判断、発見したパターン |
+| **Friction** | ハマったこと、失敗したアプローチ |
+| **Next Steps** | 次のセッションで最初にやるべきこと |
+| **Changed Files** | 変更ファイルと概要 |
 
-## 解決：HANDOVER.md を軽量版で復活
+Claude に「引き継ぎ書を書け」と言うのではなく、「この6つの軸で書け」と言う。**軸が固定されているから、毎回同じ品質の引き継ぎ書が出る。**
 
-旧版の問題（VCS 管理、自動昇格）は排除して、**セッション状態の保存だけに特化した HANDOVER.md を復活**させた。
+## Learnings → MEMORY.md の橋渡し
 
-### 役割分担
+旧版の記事では「HANDOVER.md の知見が自動的に MEMORY.md に昇格する仕組みは意図的に作っていない」と書いた。
 
-| 仕組み | 目的 | 寿命 |
-|--------|------|------|
-| auto-memory (MEMORY.md) | 長期知識（パターン、慣習） | 永続 |
-| HANDOVER.md | セッション状態（目標、進捗、次ステップ） | 使い捨て |
-| CLAUDE.md | プロジェクトルール | 永続 |
+作り直してみて考えが変わった。**Learnings 軸があると、長期的な知見が自然に抽出される。** それを MEMORY.md に反映しない手はない。
 
-3つは並列の仕組みで、昇華パイプラインではない。HANDOVER.md の知見が自動的に MEMORY.md に昇格する仕組みは**意図的に作っていない**。
-
-### 2系統の生成方法
-
-#### 1. PreCompact hook（自動）
-
-compaction 直前に発火する `PreCompact` hook で、transcript から機械的に HANDOVER.md を抽出する。
-
-```bash
-# hooks/pre-compact-handover.sh（抜粋）
-
-# transcript から構造化データを抽出
-FIRST_USER_MSG=$(grep '"role":"user"' "$TRANSCRIPT_PATH" | head -1 | \
-  jq -r '.message.content | ...' | head -c 500)
-
-CHANGED_FILES=$(grep '"tool_use"' "$TRANSCRIPT_PATH" | \
-  jq -r 'select(.message.content[]?.name == "Write" or ...) | ...' | \
-  sort -u | head -20)
-
-LAST_ASSISTANT=$(grep '"role":"assistant"' "$TRANSCRIPT_PATH" | tail -1 | \
-  jq -r '.message.content | ...' | head -c 1000)
-```
-
-AI は使わない。shell + jq のみ。完璧な要約ではないが、compaction 後の文脈復元には十分。
-
-#### 2. `/o-m-cc:handover` スキル（手動）
-
-セッション終了前に手動で呼ぶ。Claude が文脈を理解した上でリッチな引き継ぎ書を生成する。
+ただし旧版の `learnings-researcher`（VCS 履歴をマイニングして知見を抽出）とは違う。handover スキル内で Claude 自身が「この Learnings は長期的に価値があるか」を判断して MEMORY.md に追記する。VCS は使わない。シンプルに Read → 判断 → Write。
 
 ```
-## 目標
-## 完了した作業
-## 未完了の作業
-## 決定事項
-## 捨てた選択肢と理由
-## 既知の問題・注意点
-## 次のステップ
-## 変更ファイルマップ
+Learnings セクション
+  → プロジェクト固有のパターン？ → MEMORY.md に追記
+  → 一時的な情報？ → context.md に残すだけ
 ```
 
-PreCompact hook が「最低限の保険」、handover スキルが「丁寧な引き継ぎ」という関係。
+## Skill 提案の再導入
 
-### SessionStart hook で表示
+旧版では「自動スキル昇格」を入れて外した。「パターンの検出とパターンの固定化は別の判断」というのは今も正しいと思っている。
 
-セッション開始時に HANDOVER.md があればセクション見出しを表示する。
+ただ、「提案する」のと「自動で作る」のは違う。
 
 ```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 前セッションの引き継ぎ (HANDOVER.md)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ## 目標
-  ## 完了した作業
-  ## 次のステップ
-
-詳細は HANDOVER.md を Read してください。
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+### Skill Suggestion
+- 名前: sync-versions
+- トリガー: バージョン番号を変更するとき
+- 内容: plugin.json, marketplace.json, README.md のバージョンを同期
+- 根拠: 過去3セッションで毎回同じ操作をしている
 ```
 
-見出しだけ出して詳細は Read に委ねる。トークン消費を最小限にする Progressive Disclosure。
+人間が承認したら skills/ に作成する。自動作成はしない。これなら「パターンの固定化は人間が判断すべき」という原則を守りつつ、気づきを逃さない。
 
 ## 旧版との比較
 
-| | 旧版 (v0.14) | 新版 (v0.17) |
+| | 旧版 (v0.14-v0.17) | 新版 |
 |---|---|---|
-| 知識蓄積 | HANDOVER.md VCS 履歴 + learnings-researcher | auto-memory（Claude Code 本体） |
-| セッション状態 | HANDOVER.md（VCS 管理） | HANDOVER.md（使い捨て、.gitignore） |
-| スキル昇格 | promote-checker で自動 | 人間が判断して手動 |
-| compaction 対策 | なし | PreCompact hook |
-| 構成要素 | 5つ（hook + agent + skill + VCS + candidates） | 3つ（hook × 2 + skill） |
-
-## 自動スキル昇格をやめた理由
-
-v0.13 で自動スキル昇格を入れて、v0.17 で外した。学んだこと：
-
-**「パターンの検出」と「パターンの固定化」は別の判断。**
-
-auto-memory は前者を担う。「このプロジェクトでは X というパターンが使われている」を記録してくれる。しかし「X をスキルとして固定すべきか」は人間が決めるべき。理由：
-
-- パターンが頻出 ≠ スキル化に値する。一時的な頻出かもしれない
-- スキル化すると固定される。プロジェクトの方針が変わったとき、スキルが邪魔になる
-- 人間が「これは定型化したい」と思ったとき初めてスキルを作る方が、結果的にスキルの質が高い
+| ファイル構造 | 1ファイル蓄積型 | 3層分離 |
+| ロード時コスト | ファイルサイズに比例 | 常に最新1スナップショット分 |
+| 構造 | 自由記述 | 4軸固定（Entire.io inspired） |
+| 知識蓄積 | VCS 履歴マイニング or なし | Learnings → MEMORY.md |
+| スキル昇格 | 自動 or なし | 提案のみ（人間承認） |
+| 履歴 | VCS 依存 or 使い捨て | chronicle.md（30件） |
 
 ## 設計判断のまとめ
 
-今回の変更を通して固まった判断基準：
+### 自由記述より固定軸
 
-### Claude Code がやることは Claude Code に任せる
+「セッションの引き継ぎ書を書け」は曖昧すぎる。Entire.io のサマリー構造を見て、**軸を固定すれば品質が安定する**とわかった。AI に何をさせるかは、プロンプトの構造で決まる。
 
-auto-memory は Claude Code 本体の機能。プラグインが同じことをやる理由がない。「Claude Code がまだやってくれないこと」だけをプラグインで補う。
+### 3層で寿命を分ける
 
-### 自動化の線引き
+| 層 | 寿命 | 用途 |
+|---|---|---|
+| context.md | 最新1件 | 即座にロード |
+| chronicle.md | 直近30件 | 最近の経緯を把握 |
+| context-archive.md | 全量 | 必要なとき参照 |
 
-| 自動化すべき | 人間が判断すべき |
-|-------------|----------------|
-| セッション状態の保存（PreCompact hook） | スキル化の判断 |
-| 前セッションの引き継ぎ表示 | 何を長期知識にするか |
-| パターンの記録（auto-memory） | パターンを固定化するか |
+全部を1ファイルに入れるから肥大化する。寿命で分ければ、**常にロードするファイルは常に軽い**。
 
-### 使い捨てを恐れない
+### 「捨てる」と「作り直す」は違う
 
-HANDOVER.md を VCS 管理していたのは「情報を失いたくない」という心理。しかし本当に価値のある知識は auto-memory に自然に蓄積される。セッション状態は使い捨てでいい。
+旧版の記事では「全部捨てて必要なものだけ戻す」と書いた。実際にやったのは「捨てる → 足りない → 参考文献を読んで設計し直す」だった。引き算も大事だが、引きすぎたら足す。ただし前と同じものを足すのではなく、別の設計で作り直す。
 
 ## まとめ
 
-独自のナレッジ管理を全部捨てて auto-memory に移行し、足りなかった部分だけ HANDOVER.md で補った。
+HANDOVER.md がうまく使えなかったのは、構造が決まっていなかったから。Entire.io の構造化サマリーと Agent Trace の文脈保存の思想を参考に、3層アーキテクチャで作り直した。
 
 ```
-v0.14: 独自ナレッジ管理（VCS + agent + auto-promote）
-  ↓ 全部捨てる
-v0.16: auto-memory のみ
-  ↓ ギャップ発見
-v0.17: auto-memory + HANDOVER.md（軽量版）
+旧: HANDOVER.md（1ファイル蓄積、自由記述）
+  ↓ うまく使えない、削除しようとした
+  ↓ Entire.io / Agent Trace を参考に設計し直す
+新: context.md / chronicle.md / archive（3層、4軸固定）
+  + Learnings → MEMORY.md
+  + Skill 提案（人間承認）
 ```
-
-前回の「引き算」の記事と同じ結論になる。**プラットフォームが提供する機能が充実したら、プラグインは引く。** プラグインの役割は「プラットフォームがまだカバーしていない隙間を埋める」こと。隙間が埋まったら素直に退く。
 
 リポジトリ: https://github.com/kok1eee/o-m-cc
