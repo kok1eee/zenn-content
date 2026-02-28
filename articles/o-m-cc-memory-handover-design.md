@@ -89,9 +89,9 @@ Entire.io が面白いのは、Checkpoint（AI セッションの記録単位）
 
 直接使うわけではないが、**コードだけ保存して文脈を捨てるのは、後から見たとき「なぜこうなったか」がわからない**という Provenance Gap の問題提起を、改めて自分の HANDOVER.md に当てはめてみた。解決すべきなのはまさにこれだった。
 
-## 作り直し：session context の3層アーキテクチャ
+## 作り直し：session context の3層アーキテクチャ（v0.18）
 
-auto-memory は auto-memory に任せる。session context だけを専用の仕組みで管理する。Entire.io の構造化サマリーと、「文脈を捨てない」という Agent Trace の思想を組み合わせて、3層に再設計した。
+auto-memory は auto-memory に任せる。session context だけを専用の仕組みで管理する。Entire.io の構造化サマリーと、「文脈を捨てない」という Agent Trace の思想を組み合わせて、o-m-cc v0.18 で3層に再設計した。
 
 ### ファイル構成
 
@@ -104,23 +104,29 @@ auto-memory は auto-memory に任せる。session context だけを専用の仕
 
 **context.md** は常に最新1つだけ。SessionStart で即座に読める。前のスナップショットは chronicle.md に1行に圧縮して退避される。chronicle.md が30件を超えたら、古いものが archive に落ちる。
 
-### データフロー
+### hooks による自動化
+
+3層のローテーションは hooks で自動化されている。人間もClaude も何もしなくていい。
+
+| hook | イベント | やること |
+|---|---|---|
+| `pre-compact-handover.sh` | PreCompact | compaction 時に Snapshot を自動保存・ローテーション |
+| `session-resume.sh` | SessionStart | context.md + chronicle.md の直近5件を表示 |
 
 ```
-compaction 発生（自動）
-  → 既存 Snapshot を chronicle に1行圧縮して退避
-  → chronicle が 30 超過なら archive に退避
-  → context.md を新しい Snapshot で上書き
+PreCompact hook（compaction が起きるたびに自動実行）
+  1. context.md に既存 Snapshot があれば
+     → 1行に圧縮して chronicle.md の先頭に追記
+  2. chronicle.md が 30 超過
+     → 超過分を context-archive.md に退避
+  3. context.md を新しい Snapshot で上書き
 
-/o-m-cc:handover（手動）
-  → 4軸で詳細な引き継ぎ書を生成
-  → Learnings を MEMORY.md に反映
-  → 繰り返しパターンがあれば Skill 提案
-
-セッション開始
-  → context.md の最新状態を表示
-  → chronicle.md の直近5件を表示
+SessionStart hook（セッション開始時に自動実行）
+  1. context.md の Intent / Outcomes を表示
+  2. chronicle.md の直近5件を表示（最近の経緯がわかる）
 ```
+
+手動の `/o-m-cc:handover` スキルは、4軸で詳細な引き継ぎ書を生成する。加えて Learnings の MEMORY.md 反映と、繰り返しパターンの Skill 提案も行う。
 
 ### 4軸の構造
 
@@ -173,15 +179,16 @@ Session Context (context.md)          Knowledge (MEMORY.md)
 
 ## 旧版との比較
 
-| | 旧版 (v0.14-v0.17) | 新版 |
+| | 旧版 (v0.14-v0.17) | v0.18 |
 |---|---|---|
-| 知識と文脈 | 混在（1ファイル） | 分離（auto-memory / context.md） |
-| ファイル構造 | 1ファイル蓄積型 | 3層分離 |
+| 知識と文脈 | 混在（HANDOVER.md 1ファイル） | 分離（auto-memory / context.md） |
+| ファイル構造 | 1ファイル蓄積型 | context.md / chronicle.md / archive の3層 |
 | ロード時コスト | ファイルサイズに比例 | 常に最新1スナップショット分 |
 | 構造 | 自由記述 | 4軸固定（Entire.io inspired） |
+| 自動化 | なし（手動 or スキル） | PreCompact hook で自動ローテーション |
 | 知識 → auto-memory | VCS 履歴マイニング or なし | Learnings 軸で橋渡し |
 | スキル昇格 | 自動 or なし | 提案のみ（人間承認） |
-| 履歴 | VCS 依存 or 使い捨て | chronicle.md（30件） |
+| 履歴 | VCS 依存 or 使い捨て | chronicle.md（直近30件保持） |
 
 ## 設計判断のまとめ
 
