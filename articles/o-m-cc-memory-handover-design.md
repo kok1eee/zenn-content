@@ -1,5 +1,5 @@
 ---
-title: "Claude Code の「記憶」と「文脈」は別物 — auto-memory では解決できない課題を Entire.io 参考に設計した"
+title: "Claude Code の auto-memory とセッション引き継ぎを設計する"
 emoji: "🧠"
 type: "tech"
 topics: ["claudecode", "ai", "plugin", "automation"]
