@@ -6,6 +6,10 @@ topics: ["claudecode", "ai", "automation", "tips"]
 published: true
 ---
 
+:::message
+**TL;DR** — Claude Code の auto-memory とセッション引き継ぎの設計ノウハウ。記憶の種類と使い分け、MEMORY.md の構造化、context.md による文脈保存の実践パターンをまとめた。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

@@ -6,6 +6,10 @@ topics: ["claudecode", "ai", "cli", "wezterm"]
 published: false
 ---
 
+:::message
+**TL;DR** — Claude Code 2.1.16 の新タスクシステム（TaskCreate/TaskUpdate）に合わせて、o-m-cc プラグインと cc-sidebar を対応させた話。依存関係トラッキングが組み込まれた。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

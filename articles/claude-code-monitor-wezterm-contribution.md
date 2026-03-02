@@ -6,6 +6,10 @@ topics: ["claudecode", "wezterm", "zed", "terminal"]
 published: true
 ---
 
+:::message
+**TL;DR** — Claude Code の複数セッションをリアルタイム監視する claude-code-monitor の紹介。便利すぎて WezTerm がメインターミナルになった。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

@@ -6,6 +6,10 @@ topics: ["claudecode", "ai", "plugin", "multiagent"]
 published: true
 ---
 
+:::message
+**TL;DR** — Claude Code 2.1.49 の未ドキュメント新機能3つ（プラグイン settings.json 同梱・background エージェント・worktree 分離）を o-m-cc に実験導入した。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

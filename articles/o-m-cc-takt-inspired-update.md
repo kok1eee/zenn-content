@@ -6,6 +6,10 @@ topics: ["claudecode", "ai", "multiagent", "plugin", "takt"]
 published: true
 ---
 
+:::message
+**TL;DR** — AI オーケストレーションツール TAKT と自作の o-m-cc を比較。「外部エンジン」と「Claude Code ネイティブ」という異なるアプローチで同じ課題に取り組んでいた。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

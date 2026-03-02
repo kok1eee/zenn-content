@@ -6,6 +6,10 @@ topics: ["ai", "半導体", "aiチップ", "lenzo", "nvidia"]
 published: true
 ---
 
+:::message
+**TL;DR** — 日本発 AI チップ Lenzo をきっかけに、Cerebras WSE・Groq LPU・NVIDIA Rubin まで AI チップアーキテクチャの世界を調べた。GPU 一強ではなくなりつつある。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

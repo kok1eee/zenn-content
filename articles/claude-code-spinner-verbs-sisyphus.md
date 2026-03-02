@@ -6,6 +6,10 @@ topics: ["claudecode", "ai", "cli", "tips"]
 published: true
 ---
 
+:::message
+**TL;DR** — Claude Code 2.1.23 で追加された `spinnerVerbs` 設定で、処理中のスピナーテキストをカスタマイズする方法。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

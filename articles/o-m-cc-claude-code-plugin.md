@@ -6,6 +6,10 @@ topics: ["claudecode", "ai", "cli", "plugin", "automation"]
 published: true
 ---
 
+:::message
+**TL;DR** — Claude Code 用マルチエージェントプラグイン「o-m-cc」を作った。Sisyphus Loop の思想で、TODO が完了するまで止まらないワークフローを実現する。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

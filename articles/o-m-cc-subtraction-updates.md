@@ -6,6 +6,10 @@ topics: ["claudecode", "ai", "plugin", "automation", "refactoring"]
 published: true
 ---
 
+:::message
+**TL;DR** — o-m-cc v0.11〜v0.14 のアップデート。やったことの大半は削除。-1,872 行の引き算で、プラグインはシンプルに強くなった。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

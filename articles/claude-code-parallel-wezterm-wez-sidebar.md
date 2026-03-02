@@ -6,6 +6,10 @@ topics: ["claudecode", "wezterm", "rust", "terminal"]
 published: true
 ---
 
+:::message
+**TL;DR** — WezTerm のサイドバーとして常駐する Claude Code 監視ツール「wez-sidebar」を Rust で自作した。API 使用量・セッション状態・タスク進捗を同一ウィンドウ内でリアルタイム表示。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

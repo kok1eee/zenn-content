@@ -6,6 +6,10 @@ topics: ["cerebras", "opencode", "ai", "llm", "glm"]
 published: true
 ---
 
+:::message
+**TL;DR** — Cerebras の専用チップが実現する 1,000tok/s の推論速度と、そこで動く GLM-4.7 の紹介。LLM の差別化は精度より速度の時代が来るかもしれない。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

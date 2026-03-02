@@ -6,6 +6,10 @@ topics: ["rust", "systemd", "linux", "cli", "crontab"]
 published: false
 ---
 
+:::message
+**TL;DR** — crontab の手軽さで systemd timer + 常駐サービスを一元管理する CLI「sdtab」を Rust で作った。cron 構文がそのまま使えて、拡張構文（`@mon/13`, `@1st/8`）、Slack 失敗通知、リソース制限、エクスポート/インポートに対応。
+:::
+
 ## crontab、めんどくさくないですか？
 
 EC2 で 30 個以上の定期タスクを crontab で管理していた。

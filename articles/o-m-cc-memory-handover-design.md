@@ -6,6 +6,10 @@ topics: ["claudecode", "ai", "plugin", "automation"]
 published: true
 ---
 
+:::message
+**TL;DR** — HANDOVER.md を「知識の蓄積」と「セッション文脈の保存」に分離。Entire.io を参考に context.md + chronicle.md + MEMORY.md の3層アーキテクチャで作り直した。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

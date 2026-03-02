@@ -6,6 +6,10 @@ topics: ["claudecode", "ai", "multiagent", "plugin", "automation"]
 published: true
 ---
 
+:::message
+**TL;DR** — o-m-cc v0.10.0 に Council パターンを導入。Agent Teams の peer-to-peer メッセージングで、複数エージェントが同じ問題を多角的に同時分析・議論する計画フェーズを実現した。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

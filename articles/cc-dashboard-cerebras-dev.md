@@ -6,6 +6,10 @@ topics: ["claudecode", "cerebras", "go", "cli"]
 published: true
 ---
 
+:::message
+**TL;DR** — Cerebras × GLM-4.7 の 1,000tok/s 推論を使って、Claude Code 用4分割ステータスライン「cc-quadstat」を Go で爆速開発した。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

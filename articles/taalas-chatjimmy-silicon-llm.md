@@ -6,6 +6,10 @@ topics: ["ai", "半導体", "aiチップ", "taalas", "llm"]
 published: false
 ---
 
+:::message
+**TL;DR** — AI モデルをシリコンに焼く Taalas のアプローチを試した。ChatJimmy という日本語対応チャットボットもあったが、日本語はまた壊れた。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

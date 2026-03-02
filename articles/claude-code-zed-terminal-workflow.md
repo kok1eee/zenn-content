@@ -6,6 +6,10 @@ topics: ["claudecode", "zed", "opencode", "terminal", "wezterm"]
 published: true
 ---
 
+:::message
+**TL;DR** — 海外で「IDE で Claude Code 動かすな」が流行中。Zed をコードビューア、WezTerm で Claude Code 並列セッションという開発スタイルの紹介。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

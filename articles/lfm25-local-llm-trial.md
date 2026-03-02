@@ -6,6 +6,10 @@ topics: ["llm", "ai", "liquidai", "ローカルLLM"]
 published: true
 ---
 
+:::message
+**TL;DR** — Liquid AI の超小型 LLM「LFM 2.5-JP」（1.2B パラメータ / 731MB）を Mac のローカルで試した。日本語は綺麗だが「続きをどうぞ」で壊れる。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

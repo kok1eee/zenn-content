@@ -6,6 +6,10 @@ topics: ["claudecode", "ai", "cli", "multiagent", "opus"]
 published: true
 ---
 
+:::message
+**TL;DR** — Opus 4.6 の Agent Teams（peer-to-peer 協調）で、o-m-cc のマルチエージェントを subagent から全面移行した。エージェント同士が議論して結論を出せるようになった。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。

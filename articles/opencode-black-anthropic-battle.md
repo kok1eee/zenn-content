@@ -6,6 +6,10 @@ topics: ["opencode", "claude", "anthropic", "ai", "llm"]
 published: true
 ---
 
+:::message
+**TL;DR** — Anthropic がサードパーティの Claude 認証をブロック → OpenCode が「Black」を即リリースして復活。技術的な仕組みとビジネスの攻防を解説。
+:::
+
 ## はじめに
 
 2025年1月、AI開発者コミュニティで大きな騒動が起きました。

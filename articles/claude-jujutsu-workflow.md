@@ -6,6 +6,10 @@ topics: ["jujutsu", "claudecode", "ai", "versioncontrol", "git"]
 published: true
 ---
 
+:::message
+**TL;DR** — git を卒業して Jujutsu（jj）に乗り換えた。自動マージ、コンフリクトの先送り、undo の安心感。Claude Code との相性も良い。
+:::
+
 ## はじめに
 
 > 業務自動化Pythonエンジニア。バイブコーディング歴1年 ≒ エンジニア歴。
