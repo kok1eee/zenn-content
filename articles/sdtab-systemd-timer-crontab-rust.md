@@ -273,11 +273,20 @@ cron パーサーを自前で書いたのは、拡張構文（`@mon/9`, `@1st/8`
 ## インストール
 
 ```bash
-cargo install --git https://github.com/kok1eee/systemdtab
+# バイナリをダウンロード（Rust不要）
+curl -L https://github.com/kok1eee/systemdtab/releases/latest/download/sdtab-x86_64-linux \
+  -o ~/.local/bin/sdtab && chmod +x ~/.local/bin/sdtab
+
+# または Cargo 経由
+cargo install systemdtab
+
+# 初期化
 sdtab init
 ```
 
-`cargo install` できる人なら systemd を直接覚えることもできる。でも 30 件のジョブを 2 ファイルずつ手書き・管理するのと、`sdtab add` 一行で済ませるのは別の話。systemd の知識があっても sdtab の方が速い。
+`sdtab init` は `loginctl enable-linger`（ログアウト後もタイマーを動かすために必要）や systemd ユニットディレクトリの作成を自動で行う。systemd の事前知識がなくてもここまでは通る。
+
+30 件のジョブを `.service` + `.timer` の 2 ファイルずつ手書き・管理するのと、`sdtab add` 一行で済ませるのは別の話。systemd を知っている人にも sdtab の方が速い。
 
 ## 実際の移行
 
