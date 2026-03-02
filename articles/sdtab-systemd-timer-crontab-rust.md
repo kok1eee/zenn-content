@@ -53,6 +53,8 @@ Claude Code に「systemd timer を作って」と頼めば `.service` と `.tim
 
 ## sdtab とは
 
+EC2 一台で数十件のジョブと常駐サービスを管理する、個人〜小規模向けの CLI ツール。チームや複数環境のオーケストレーション（Airflow, Prefect 等）とは別のレイヤーを狙っている。
+
 ```bash
 # タイマーを追加（cron構文がそのまま使える）
 sdtab add "0 9 * * *" "uv run ./report.py" --name report
@@ -138,6 +140,8 @@ sdtab add "@mon/13" "./weekly.sh"
 sdtab add "@1st/8" "./monthly.sh"
 sdtab add "@26th/11:30" "./billing.sh"
 ```
+
+曜日は英語略称（`@mon`, `@tue`, `@sun`）、日付は英語序数（`@1st`, `@20th`, `@26th`）で指定する。次元が違うので表記も分けている。
 
 `sdtab list` で見たとき、SCHEDULE 列が `@mon/13` や `@1st/8` だと何曜日・何日かすぐわかる。
 
@@ -226,6 +230,8 @@ systemctl --user enable --now sdtab-report.timer
 ```
 
 独自のデーモンやデータベースは不要。生成されるのは標準的な systemd ユニットファイルだけ。`sdtab` がなくても `systemctl` で直接操作できる。
+
+**注意**: sdtab は systemd の `--user` ユニットを使う。ログアウト後もタイマーを動かし続けるには `loginctl enable-linger` が必要（`sdtab init` が自動で設定する）。root 権限のジョブは対象外。
 
 メタデータ（元の cron 式、コマンドなど）はサービスファイルのコメントとして保存される：
 
