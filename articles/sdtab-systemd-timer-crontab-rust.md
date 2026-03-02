@@ -7,7 +7,7 @@ published: true
 ---
 
 :::message
-**TL;DR** — crontab の手軽さで systemd timer + 常駐サービスを一元管理する CLI「sdtab」を Rust で作った。cron 構文がそのまま使えて、拡張構文（`@mon/13`, `@1st/8`）、Slack 失敗通知、リソース制限、エクスポート/インポートに対応。
+**TL;DR** — EC2 一台で crontab 30 件 + 常駐サービスを一元管理するための CLI「sdtab」を Rust で作った。cron 構文そのままで systemd timer を生成し、拡張構文（`@mon/13`, `@1st/8`）、Slack 失敗通知、リソース制限に対応。個人〜小規模向け。
 :::
 
 ## crontab、めんどくさくないですか？
@@ -262,6 +262,8 @@ cron パーサーを自前で書いたのは、拡張構文（`@mon/9`, `@1st/8`
 cargo install --git https://github.com/kok1eee/systemdtab
 sdtab init
 ```
+
+`cargo install` できる人なら systemd を直接覚えることもできる。でも 30 件のジョブを 2 ファイルずつ手書き・管理するのと、`sdtab add` 一行で済ませるのは別の話。systemd の知識があっても sdtab の方が速い。
 
 ## 実際の移行
 
