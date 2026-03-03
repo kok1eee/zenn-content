@@ -72,21 +72,28 @@ crontab の `crontab -e` + `crontab -l` に相当する操作が、`sdtab add` +
 
 https://github.com/kok1eee/systemdtab
 
-## 常駐サービスも管理
+## AI が組み立てる
 
-sdtab は `@service` で常駐サービスも扱える。
+sdtab は常駐サービスも扱えるし、オプションもいろいろある。
 
 ```bash
 sdtab add "@service" "uv run python app.py" \
   --name slack-bot \
   --env-file .env \
   --exec-start-pre "/home/ec2-user/.local/bin/uv sync" \
+  --memory-max 1G \
   --description "Slack Bot"
 ```
 
-`Restart=always` がデフォルトなので、プロセスが落ちても自動復帰する。`--memory-max` や `--cpu-quota` でリソース制限もかけられる。
+ただ、これを自分で打つかというと打たない。Claude Code に頼む。
 
-タイマーも常駐サービスも `sdtab list` で一覧できる。これが欲しかった。
+```
+You> /sdtab Slack Botを常駐で動かして。envファイルあり、起動前にuv sync
+```
+
+Claude Code が意図を読み取って `sdtab add` コマンドを組み立て、`--dry-run` で確認を求めてから実行する。`sdtab-` プレフィックス付きのユニットしか触らないので、systemd の他の設定を壊す心配がない。
+
+`sdtab init` を実行すると Claude Code 用のスキルファイルと CLAUDE.md がインストールされる。以降、どのプロジェクトからでも `/sdtab` で自然言語から操作できる。オプションを覚える必要はない。
 
 ## crontab vs sdtab
 
@@ -214,20 +221,6 @@ env = ["PATH=/home/ec2-user/.local/bin:/usr/bin:/bin"]
 ```
 
 `sdtab apply` は差分検知もする。変更があったユニットだけを更新し、不要な再起動を避ける。
-
-## AI エージェント対応
-
-AI に systemd を直接触らせたくない、という話の解決策。
-
-sdtab なら `sdtab-` プレフィックス付きのユニットしか触らないし、`--dry-run` でプレビューもできる。
-
-`sdtab init` は Claude Code のスキルファイルを自動インストールする。以降、どのプロジェクトからでも自然言語で操作できる：
-
-```
-You> /sdtab 毎朝9時にreport.pyを実行して
-```
-
-Claude Code が意図を解釈し、`sdtab add "@daily/9" "uv run ./report.py" --dry-run` で確認を求めた後、タイマーを作成する。AI に「`sdtab add` して」と頼むだけで、安全な範囲に収まる。
 
 ## 仕組み
 
