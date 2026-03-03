@@ -10,9 +10,9 @@ published: true
 **TL;DR** — EC2 一台で crontab 30 件 + 常駐サービスを一元管理するための CLI「sdtab」を Rust で作った。cron 構文そのままで systemd timer を生成し、拡張構文（`@mon/13`, `@1st/8`）、Slack 失敗通知、リソース制限に対応。個人〜小規模向け。
 :::
 
-## crontab、めんどくさくないですか？
+## crontab、もういいだろ
 
-EC2 で 30 個以上の定期タスクを crontab で管理していた。
+EC2 で 30 個以上の定期タスクを crontab で回していた。
 
 ```bash
 0 8 1 * * cd /home/ec2-user/scripts/sync_report && ./start.sh monthly >> /tmp/cron_sync_report_1st.log 2>&1
@@ -20,22 +20,11 @@ EC2 で 30 個以上の定期タスクを crontab で管理していた。
 0 1 * * * cd /home/ec2-user/scripts/data_pipeline && stdbuf -oL -eL ./start.sh fetch --cron-mode >> /tmp/cron_fetch.log 2>&1
 ```
 
-めんどくさいポイント：
+2026 年にもなって `>> /tmp/cron_*.log 2>&1` を毎回書いている。ログは `/tmp` に散らかり放題でローテーションは自前。エラーを調べたいときに `/tmp/cron_*.log` を片っ端から grep する羽目になる。`crontab -l` は生テキスト。何が動いていて何が止まっているかわからない。タスクが落ちても通知はないから、数日後に「あれ、動いてなくない？」で気づく。メモリリークしても他のタスクを巻き添えにするまで止まらない。ちなみに `crontab -e`（編集）と `crontab -r`（全削除）はキーボードで隣。確認なし。
 
-- **ログが散らばる** — `/tmp/cron_*.log` が大量に生まれる。ローテーションは自前
-- **一覧性がない** — `crontab -l` は生テキスト。何が動いていて何が止まっているかわからない
-- **失敗に気づけない** — 通知がないから、数日後に「あれ、動いてない？」と気づく
-- **リソース制限ができない** — メモリリークで他のタスクを巻き込む
+同じ EC2 で Slack Bot は systemd の `.service` で動かしていた。`Restart=always` で落ちても自動復帰、journalctl でログも一箇所に集まる。定期タスクだけが crontab に取り残されている。
 
-その上で、**怖い**。
-
-`crontab -e`（編集）と `crontab -r`（全削除）が隣のキー。指が滑ったら全部消える。確認もない。構文が間違っていても登録できてしまう。壊れた状態でも何も言わずに受け入れて、ただ黙って動かない。
-
-とはいえ、crontab を手で編集することはほとんどなかった。ほぼ Claude Code にやらせていた。ジョブの追加も編集も「crontab にこれ追加して」で済ませていた。
-
-cron よりも良い仕組みがあるのはずっと知っていた。Slack Bot や Web アプリは systemd の `.service` で動かしていたし、`Restart=always` で落ちても自動復帰、journalctl でログも見られる。定期タスクも systemd timer にすれば crontab の不満は全部解決する。
-
-常駐サービスは systemd、定期タスクは crontab。同じ EC2 で動いているのに管理が分断されている。これを一元管理したかった。
+crontab を手で触ることはほぼなかった。Claude Code に「crontab にこれ追加して」で全部やらせていた。だったらもう crontab である理由がない。systemd timer に全部寄せよう、と思った。
 
 ## じゃあ全部 systemd timer に移行すればいい。でも…
 
@@ -81,7 +70,7 @@ https://github.com/kok1eee/systemdtab
 
 ## 常駐サービスも管理
 
-導入で書いた「一元管理したい」の話。sdtab は `@service` で常駐サービスも扱える。
+sdtab は `@service` で常駐サービスも扱える。
 
 ```bash
 sdtab add "@service" "uv run python app.py" \
@@ -124,7 +113,7 @@ systemd timer を直接使う場合との比較。sdtab は systemd を知って
 
 ## 色付きリスト表示
 
-壁 1「一覧で見るものがない」の解決策。
+`systemctl list-timers` では足りなかった一覧性の話。
 
 ```
 NAME              TYPE     SCHEDULE       COMMAND                               STATUS
@@ -224,7 +213,7 @@ env = ["PATH=/home/ec2-user/.local/bin:/usr/bin:/bin"]
 
 ## AI エージェント対応
 
-壁 2「AI に systemd を直接触らせるのが怖い」の解決策。
+AI に systemd を直接触らせたくない、という話の解決策。
 
 sdtab なら `sdtab-` プレフィックス付きのユニットしか触らないし、`--dry-run` でプレビューもできる。
 
