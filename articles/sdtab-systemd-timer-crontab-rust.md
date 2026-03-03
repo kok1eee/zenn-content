@@ -279,14 +279,7 @@ sdtab init
 
 `sdtab init` は `loginctl enable-linger`（ログアウト後もタイマーを動かすために必要）や systemd ユニットディレクトリの作成を自動で行う。systemd の事前知識がなくてもここまでは通る。
 
-:::details 必要環境
-- **systemd 244+** が動作する Linux（ユーザーセッション限定）
-- `--memory-max`, `--cpu-quota` は **cgroups v2** が必要（カーネルの機能。確認: `test -f /sys/fs/cgroup/cgroup.controllers && echo v2 || echo v1`）
-- `--io-weight` は systemd 247+ かつ cgroups v2 が必要
-- **Amazon Linux 2**（systemd 219）は非対応。**Amazon Linux 2023**（systemd 252）以降を推奨
-:::
-
-30 件のジョブを `.service` + `.timer` の 2 ファイルずつ手書き・管理するのと、`sdtab add` 一行で済ませるのは別の話。systemd を知っている人にも sdtab の方が速い。
+動作には **systemd 244+** の Linux が必要。リソース制限（`--memory-max`, `--cpu-quota`）を使う場合は cgroups v2 も必要になる。Amazon Linux 2（systemd 219）は非対応、Amazon Linux 2023 以降を推奨。
 
 ## 実際の移行
 
