@@ -359,6 +359,24 @@ EnvironmentFile=-/home/ec2-user/scripts/report/.env
 
 34 個の start.sh を全廃して、サービスファイルから直接 `uv run python main.py` を呼ぶようにした。一気に変えたが、全ユニット正常に動いた。パターンが統一されていたのが大きい。
 
+start.sh の廃止に合わせて、Python 側のログコードも大幅に簡素化した。以前は各プロジェクトに `FileHandler` でファイルに書き出すロガーがあった。
+
+```python
+# Before: ファイルベースのロガー
+handler = RotatingFileHandler("logs/app.log", maxBytes=5*1024*1024, backupCount=3)
+logger.addHandler(handler)
+```
+
+journald に任せるなら、Python は stdout/stderr に出力するだけでいい。
+
+```python
+# After: stdout のみ
+handler = logging.StreamHandler(sys.stdout)
+logger.addHandler(handler)
+```
+
+`RotatingFileHandler` も `find -mtime +30 -delete` も要らない。ログのローテーション、保持期間、ディスク使用量の管理は全部 journald がやってくれる。Python 側のロガーは「何を出力するか」だけに集中すればいい。
+
 ## ログの永続化と IOPS 問題の根本解消
 
 冒頭で「30 個のジョブが好き勝手にログを書いて IOPS が詰まった」と書いた。start.sh を廃止してもログの問題は残る。journald のデフォルト設定ではユーザーログが volatile（メモリのみ）で、再起動やローテーションで消えてしまう。
