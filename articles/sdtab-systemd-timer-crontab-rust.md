@@ -380,6 +380,29 @@ sudo systemctl restart systemd-journald
 
 しかも IOPS の問題が根本的に解消された。crontab + start.sh 時代は 30 個のジョブがそれぞれファイルに直接書き込んでいた。journald は違う。全ジョブのログをカーネルのバッファで受けて、`SyncIntervalSec=5m`（デフォルト）で 5 分に 1 回まとめてディスクに書く。30 回の書き込みが 1 回になる。`stdbuf` のハックはもう要らない。
 
+## 永続化してから実際に起きたこと
+
+永続化の設定を入れた翌日、`sdtab list` で複数のサービスが赤くなっていた。以前なら「ログがローテートされていて原因不明」で終わるパターンだが、今回は違った。
+
+```bash
+journalctl --user -u sdtab-slot-content-hourly --since "2026-03-09 16:00" --no-pager
+```
+
+ログがしっかり残っている。4 つのサービスが失敗していたが、全部その場で原因を特定して修正できた。
+
+| サービス | 原因 | 修正時間 |
+|---------|------|---------|
+| slot-content-hourly | `logger.info()` にカスタム kwargs を渡していた | 5 分 |
+| slot-image | 同上（`banner_type=` 引数） | 同時に修正 |
+| premium | uv 移行時に `main.py` が削除されていた | 3 分 |
+| pms-scripts | 存在しない `directories["log"]` キーを参照 | 3 分 |
+
+面白いのは slot-content-hourly のケース。HTML 更新の処理自体は毎回成功していたのに、終了時のログ出力（`ErrorHandler._finalize()` 内の `logger.info("終了", total=..., duration=...)`）で `TypeError` が出て exit 1 になっていた。しかもリトライ機構が「失敗した」と判断して 3 回繰り返すので、成功している処理が 3 倍走っていた。ログがなければ「処理自体は成功しているのにエラーになる」という不思議な状況の原因は絶対にわからなかった。
+
+もう一つ判明したのが、**Slack 通知が実は飛んでいなかった**こと。`sdtab init --slack-webhook` で設定したはずの webhook URL がテスト値のままだった。さらに、`<!here>` メンションは Slack の Incoming Webhook では機能せず、`<@USER_ID>` でないと通知に気づけないこともわかった。これもログを追えたからこそ発覚した問題で、永続化していなければ「通知が来ないな」で放置されていたと思う。
+
+**ログが残る**というのは当たり前のことのようで、crontab + volatile journald の環境では当たり前ではなかった。永続化の設定は 3 行のファイルを置くだけ。それだけで「原因不明のエラー」がなくなる。
+
 ## まとめ
 
 sdtab は「crontab の手軽さ」と「systemd timer の堅牢さ」を両立する CLI ツール。
