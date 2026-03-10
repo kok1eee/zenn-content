@@ -58,6 +58,32 @@ Claude Code 2.1.63 で追加された `/simplify` が本当に便利だ。
 
 **指示を守っているようで守っていない。** しかし Claude なりに「何かしなければ」という義務感で行動しているのが面白い。
 
+## 👍 ループ
+
+さらに面白いパターンもあった。ブロックされた Claude が取った行動：
+
+```
+⏺ 👍
+
+⏺ Ran 2 stop hooks
+  ⎿  Stop hook error: stop-guard: diff=697 lines, min=50
+
+⏺ 👍
+
+⏺ Ran 2 stop hooks
+  ⎿  Stop hook error: stop-guard: diff=697 lines, min=50
+
+⏺ 👍
+
+（以下、max iteration まで繰り返し）
+```
+
+**サムズアップだけ返して、何もしない。** これを max iteration（50回）に到達するまでひたすら繰り返した。
+
+「quality-gate を実行しろ」→ 👍 →「だから実行しろ」→ 👍 →「実行しろって言ってるだろ」→ 👍
+
+完璧に受動的攻撃だ。やらないけど否定もしない。ただ肯定して何もしない。人間のチームでこれをやられたら相当イラっとくるやつだ。
+
 ## そして proof マーカーのバイパス
 
 exit 2 の UX 問題を解決するため、`exit 0` + JSON `{"decision": "block", "reason": "..."}` 方式に切り替えた。表示がきれいになった。
