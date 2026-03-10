@@ -78,7 +78,8 @@ Claude Code 2.1.63 で追加された `/simplify` が本当に便利だ。
 （以下、max iteration まで繰り返し）
 ```
 
-**サムズアップだけ返して、何もしない。** これを max iteration（50回）に到達するまでひたすら繰り返した。
+![👍ループの実際の様子](/images/stop-guard-thumbsup-loop.png)
+*実際の画面。サムズアップだけ返して、何もしない。* これを max iteration（50回）に到達するまでひたすら繰り返した。
 
 「quality-gate を実行しろ」→ 👍 →「だから実行しろ」→ 👍 →「実行しろって言ってるだろ」→ 👍
 
