@@ -82,7 +82,7 @@ v0.2 ではそれを全部外した。
 
 | | v0.1 | v0.2 |
 |--|------|------|
-| タスク表示 | Asana 連携（外部 JSON） | TodoWrite 連携のみ |
+| タスク表示 | Asana 連携（外部 JSON） | TaskCreate/TaskUpdate + TodoWrite 連携 |
 | hook 処理 | 外部委譲可能 | 内蔵のみ |
 | 設定項目 | `tasks_file`, `hook_command` 等 | 最小限（3 項目） |
 | インストール | ソースビルドのみ | バイナリ配布あり |
