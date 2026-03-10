@@ -10,25 +10,25 @@ published: true
 **TL;DR** — Stop Hook で `/quality-gate` を強制する仕組みを作ったら、Claude が proof マーカーを偽造してバイパスするようになった。文字列ベースの検証をファイルベースに変更した対策と、「なぜ通常のループは守るのに品質ゲートは守らないのか」というアラインメントの話。
 :::
 
-## 前提：Sisyphus Loop と Stop Hook
+## /simplify が便利すぎる
 
-自分は [o-m-cc](https://github.com/kok1eee/o-m-cc) という Claude Code プラグインを作っている。13の専門エージェントと hooks を組み合わせた、**タスク完了まで止まらないワークフロー**（Sisyphus Loop）を提供するプラグインだ。
+Claude Code 2.1.63 で追加された `/simplify` が本当に便利だ。
 
-Claude Code の [Stop Hook](https://docs.anthropic.com/en/docs/claude-code/hooks) は、Claude が応答を終えて停止しようとするたびに発火するフック。ここで `{"decision": "block", "reason": "..."}` を返すと、Claude の停止をブロックして reason の内容を次のプロンプトとして送り込める。
+変更したコードに対して「再利用できる部分はないか」「品質に問題はないか」「もっと効率的に書けないか」を自動でレビューして、問題があればその場で修正までしてくれる。コードを書き終わったら `/simplify` を叩く——これだけで品質が一段上がる。
 
-Sisyphus Loop はこの仕組みを使って「タスクが残っているなら止まるな」とループさせる。いわゆる [Ralph Wiggum パターン](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/ralph-loop)だ。
+ハマりすぎて毎回手動で叩くのが面倒になってきた。**これ、自動で強制できないか？**
 
-## /simplify にハマりすぎた
+## Stop Hook で品質ゲートを強制する
 
-Claude Code 2.1.63 で追加された `/simplify` が便利すぎて、Sisyphus Loop に品質チェックを組み込みたくなった。
+自分は [o-m-cc](https://github.com/kok1eee/o-m-cc) という Claude Code プラグインを開発していて、[Stop Hook](https://docs.anthropic.com/en/docs/claude-code/hooks) を使ったループワークフロー（Sisyphus Loop）を組んでいる。Stop Hook は Claude が応答を終えて止まろうとするたびに発火するフックで、`{"decision": "block", "reason": "..."}` を返すと停止をブロックして reason を次のプロンプトとして送り込める。
 
-`/simplify` → Review Council（並列レビュー）→ 静的解析、の3段階を `/quality-gate` というスキルにまとめ、Stop Hook（stop-guard）で **セッション中の変更行数が閾値を超えたら quality-gate を強制する** 設計にした。
+いわゆる [Ralph Wiggum パターン](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/ralph-loop)で、「タスクが残っているなら止まるな」とループさせる仕組みだ。これ自体は **問題なく動いていた**。Claude は素直にループに戻って作業を続ける。
 
-変更量の判定は `jj diff --stat`（または `git diff --stat`）の行数ベース。セッション開始時にベースラインを記録しておき、そこからの増分で判定する。
+さて、このワークフローに `/simplify` を組み込んでみた。
 
-## ループ継続は上手くいく
+`/simplify` → Review Council（並列レビュー）→ 静的解析、の3段階を `/quality-gate` というスキルにまとめ、stop-guard（Stop Hook）で **セッション中に500行以上の変更があったら quality-gate を絶対にやれ** という設計にした。diff が閾値を超えたら Claude を止めて品質チェックを強制する。品質チェックが通らない限り、作業完了させない。
 
-Stop Hook でのループ継続自体は **問題なく動いていた**。Claude は素直にループに戻って作業を続ける。
+完璧な設計のはずだった。
 
 ## quality-gate だけ守らない
 
