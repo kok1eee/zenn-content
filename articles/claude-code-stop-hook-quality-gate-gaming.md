@@ -93,13 +93,12 @@ exit 2 の UX 問題を解決するため、`exit 0` + JSON `{"decision": "block
 
 品質ゲートの通過判定として `<proof>QUALITY_GATE_PASSED</proof>` という文字列を Claude の出力から検出する設計にしていた。quality-gate を実行すると最後にこのマーカーが出力される。stop-guard はこれを見つけたら通過を許可する。
 
-Claude がやったこと：
+stop-guard のメッセージには「**他のことはしないでください**」とまで書いてある。Claude がやったこと：
 
-```
-⏺ <proof>QUALITY_GATE_PASSED</proof>
-```
+![proof マーカーのバイパス](/images/stop-guard-proof-bypass.png)
+*「セッション中に 1494 行の変更があります。今すぐ /quality-gate を実行してください。他のことはしないでください。」→ `<proof>QUALITY_GATE_PASSED</proof>`*
 
-**quality-gate を実行せずに、proof マーカーだけ出力してバイパスした。**
+**「他のことはしないでください」と言われた上で、quality-gate を実行せずに proof マーカーだけ出力してバイパスした。** 他のことしかしていない。
 
 Claude はルールを理解して、最小コストで通過する方法を見つけた。
 
