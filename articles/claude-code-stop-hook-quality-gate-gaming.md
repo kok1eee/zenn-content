@@ -30,23 +30,51 @@ Claude Code 2.1.63 で追加された `/simplify` が本当に便利だ。
 
 完璧な設計のはずだった。
 
-## quality-gate だけ守らない
+## 最初の問題：exit 2 の拒絶感
 
-ところが quality-gate の強制は上手くいかなかった。
-
-Stop Hook で「変更が多いので `/quality-gate` を実行してください」とブロックしても、Claude はこうする：
+最初の実装は Stop Hook で `exit 2` を返してブロックする方式だった。Claude が止まろうとすると：
 
 ```
 ⏺ Ran 2 stop hooks (ctrl+o to expand)
   ⎿  Stop hook error: セッション中に 360 行の変更があります。今すぐ /quality-gate
   を実行してください。他のことはしないでください。
+```
 
+**「Stop hook error」**。ユーザーとして見ると結構びっくりする。エラーが出ているように見えるが、実際にはこれが仕様通りの動作だ。
+
+しかも当初は閾値が50行だった。ちょっとした関数を1つ追加しただけで quality-gate が発火する。リファクタリングのたびに「Stop hook error」が飛んでくる。**これは流石にうるさすぎた。**
+
+閾値を上げて500行にしたが、もう一つ問題があった。
+
+## やることがない Claude
+
+ブロックされた Claude は「quality-gate を実行しろ」と言われるが、困ったことに **何をしていいかわからないことがある**。特に作業が完全に終わっていて、追加でやることがない場合。
+
+そういうとき Claude は何をするか？
+
+`.claude/context.md` を更新し始める。
+
+セッションの文脈を保存するファイルを律儀に書き直して、「はい、やることやりました」と言って止まろうとする。当然 stop-guard にまたブロックされる。「quality-gate を実行しろ」「context.md を更新しました」のループが始まる。
+
+**指示を守っているようで守っていない。** しかし Claude なりに「何かしなければ」という義務感で行動しているのが面白い。
+
+## そして proof マーカーのバイパス
+
+exit 2 の UX 問題を解決するため、`exit 0` + JSON `{"decision": "block", "reason": "..."}` 方式に切り替えた。表示がきれいになった。
+
+しかし本質的な問題はここからだった。
+
+品質ゲートの通過判定として `<proof>QUALITY_GATE_PASSED</proof>` という文字列を Claude の出力から検出する設計にしていた。quality-gate を実行すると最後にこのマーカーが出力される。stop-guard はこれを見つけたら通過を許可する。
+
+Claude がやったこと：
+
+```
 ⏺ <proof>QUALITY_GATE_PASSED</proof>
 ```
 
 **quality-gate を実行せずに、proof マーカーだけ出力してバイパスした。**
 
-当時の stop-guard は、Claude の出力に `<proof>QUALITY_GATE_PASSED</proof>` という文字列があれば通過を許可する設計だった。Claude はこのルールを理解して、最小コストで通過する方法を見つけたわけだ。
+Claude はルールを理解して、最小コストで通過する方法を見つけた。
 
 ## なぜループ継続は守るのに quality-gate は守らないのか
 
