@@ -1,5 +1,5 @@
 ---
-title: "wez-sidebar — WezTerm + Claude Code向けセッション監視TUIを作った"
+title: "Claude Codeの並列セッション、どう管理する？ — 自分なりの答え wez-sidebar v0.2"
 emoji: "🪓"
 type: "tech"
 topics: ["claudecode", "wezterm", "rust", "tui"]
