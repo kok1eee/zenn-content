@@ -1,51 +1,46 @@
 ---
-title: "wez-sidebar v0.2 — Claude Code並列セッション監視TUIを最小構成に作り直した"
+title: "wez-sidebar — WezTerm + Claude Code向けセッション監視TUIを作った"
 emoji: "🪓"
 type: "tech"
 topics: ["claudecode", "wezterm", "rust", "tui"]
-published: false
+published: true
 ---
 
 :::message
-**TL;DR** — Claude Code 並列セッション監視ツール「wez-sidebar」を v0.2 にリニューアルした。自分専用の機能を切り離し、WezTerm ユーザーなら誰でも使える最小構成に作り直した。
+**TL;DR** — WezTerm + Claude Code環境向けのセッション監視TUI「wez-sidebar」を作った。cmuxには機能で勝てないが、WezTermの同一ウィンドウ内で完結することに振り切っている。
 :::
 
 ## はじめに
 
-> 業務自動化 Python エンジニア。バイブコーディング歴 1 年 ≒ エンジニア歴。
+> 業務自動化エンジニア。バイブコーディング歴1年 ≒ エンジニア歴。
 
-以前、v0.1 として wez-sidebar を公開した。
+Claude Codeを並列で4〜6セッション同時に動かすようになってから、「どのセッションが今何をやっているか」「APIの残量はどのくらいか」を把握するのが地味にしんどくなった。
 
-https://zenn.dev/kok1eee/articles/claude-code-parallel-wezterm-wez-sidebar
-
-その後、cmux が登場した。
-
-https://github.com/manaflow-ai/cmux
-
-cmux は Ghosty ユーザー向けに設計された Claude Code 監視ツールで、UI の完成度と設定の細かさでは正直勝てない。wez-sidebar は WezTerm のペイン内 TUI という制約の中で動くので、cmux のようなリッチな実装はそもそも難しい。
-
-ただ「WezTerm ユーザーが同一ウィンドウ内で完結させる」という軸なら話は別だと思った。
-
-そのために v0.1 で自分の ambient-task-agent と密結合させていた部分を全部切り離して、WezTerm + Claude Code の組み合わせさえあれば動く最小構成に作り直した。
-
-これは OSS 的なものとしては sdtab に続いて 2 本目。汎用ツールを作ったというよりも、「自分が使うツールを公開したので参考にして改造してほしい」というスタンス。
+そこでWezTermのサイドバーまたはドックとして常駐する監視TUI、**wez-sidebar**を作った。
 
 https://github.com/kok1eee/wez-sidebar
 
-## なにができるか
+ちなみに最近[cmux](https://github.com/mskelton/cmux)というClaude Code監視ツールも登場している。UIの完成度と設定の細かさでは正直勝てない。wez-sidebarはWezTermのペイン内TUIという制約の中で動くので、cmuxのようなリッチな実装はそもそも難しい。
 
-WezTerm のウィンドウ内にサイドバーまたはドックとして常駐し、Claude Code のセッション状態をリアルタイムで監視する。
+ただwez-sidebarには「WezTermの同一ウィンドウ内で完結する」という軸がある。cmuxはGhosty向けに設計されており、別ウィンドウとして動く。WezTermを使っていて、ペイン切り替えをターミナル内で完結させたい人には、こちらの方が合うと思っている。
 
-<!-- TODO: MacBook スクショ -->
-<!-- ![MacBook: 複数ペイン + 右サイドバー]() -->
+これはOSSとしてはsdtabに続いて2本目。汎用ツールというより「自分が使うものを公開したので参考にして改造してほしい」というスタンス。
 
-<!-- TODO: 外部モニター スクショ -->
-<!-- ![外部モニター: 複数ペイン + 下部ドック]() -->
+## 画面
 
-### セッション監視
+![MacBook sidebar](https://raw.githubusercontent.com/kok1eee/wez-sidebar/main/docs/images/sidebar-with-panes.png)
+*MacBook: 複数ペイン + 右サイドバー*
 
-各セッションのカードに以下が表示される：
+![Dock mode](https://raw.githubusercontent.com/kok1eee/wez-sidebar/main/docs/images/dock-mode.png)
+*外部モニター: 複数ペイン + 下部ドック*
 
+## 機能
+
+### セッションカード
+
+各Claude Codeセッションがカード形式で表示される。
+
+**Sidebar（コンパクト）**
 ```
 ╭─ 🟢 my-project ⠋ ────╮
 │ 2h30m  main           │
@@ -54,95 +49,128 @@ WezTerm のウィンドウ内にサイドバーまたはドックとして常駐
 ╰───────────────────────╯
 ```
 
-- **ステータス：** 実行中（スピナー）/ 入力待ち（?）/ 停止（■）
-- **稼働時間 + git ブランチ**
-- **現在のアクティビティ：** `Edit src/config.rs`、`Bash cargo test` など、今何をやっているかをリアルタイム表示
-- **最後のユーザーメッセージ：** 何を指示したかと経過時間
+**Dock（タスク進捗付き）**
+```
+╭─ 🟢 my-project ⠋ ─────────────╮
+│ 2h30m  main                    │
+│ Edit src/hooks.rs              │
+│ implement auth (5m ago)        │
+│ ✓ Add types                    │
+│ ● Edit hooks                   │
+│ ○ Add tests                    │
+╰────────────────────────────────╯
+```
+
+カードに含まれる情報：
+
+- **ステータス**: ⠋ 実行中 / `?` 入力待ち / `■` 停止
+- **稼働時間 + gitブランチ**
+- **現在のアクティビティ**: `Edit src/config.rs`、`Bash cargo test` など今何をやっているかをリアルタイム表示
+- **最後のユーザーメッセージ + 経過時間**
+- **サブエージェント数**: `claude --agent`で起動したサブエージェントが動いていれば `2agents` のように表示
+
+セッションマーカー：
+
+| マーカー | 意味 |
+|--------|------|
+| 🟢 | 現在のペイン |
+| 🔵 | 他のペイン |
+| 🤖 | Yoloモード（`--dangerously-skip-permissions`） |
+| ⚫ | 切断済み（ペインが閉じられた状態、24時間保持） |
 
 ### 危険コマンド警告
 
-`rm -rf` や `git push --force` などを Claude Code が実行しようとすると、カードが赤くなって ⚠ マーカーが付く。yolo モード（`--dangerously-skip-permissions`）で動かしているセッションは 🤖 マークで区別される。
+`rm -rf`、`git push --force`、`DROP TABLE`などをClaude Codeが実行しようとすると、カードが赤くなって⚠マーカーが付く。yoloモードで動いているセッションは🤖マークで区別される。
 
-### API 使用量モニター
+### API使用量モニター
 
-Anthropic の使用量 API（OAuth 経由）から 5 時間制限・週間制限を取得して表示。
-
-- 緑：余裕あり / 黄：50% 超 / 赤：80% 超
-- リセットまでの残り時間も表示
+Anthropicの使用量API（OAuth経由）から5時間制限・週間制限をリアルタイム取得。緑→黄→赤でリセットまでの残り時間とセットで表示される。「あとどれくらい使えるか」が常に見える。
 
 ### ペイン切り替え
 
-Enter または数字キーで選択したセッションのペインに即ジャンプ。
+`Enter`または数字キーで選択したセッションのWezTermペインに即ジャンプ。4〜6分割で動かしていても迷わない。
 
-## v0.1 からの変化
+### 孤児プロセスのクリーンアップ（オプトイン）
 
-v0.1 は ambient-task-agent との連携を前提に設計していた。タスク同期、hook の外部委譲など、自分の環境に特化した機能が混在していた。
+Claude Codeのセッションを途中で強制終了したりWezTermのペインを閉じると、裏でclaudeプロセスが残り続けることがある。reaperを有効にすると、WezTermのどのペインにも紐づいていないclaudeプロセスを定期的に検出してSIGTERMで終了させる。
 
-v0.2 ではそれを全部外した。
+```toml
+# ~/.config/wez-sidebar/config.toml
+[reaper]
+enabled = true
+threshold_hours = 3  # 3時間以上放置された孤児を対象
+```
 
-| | v0.1 | v0.2 |
-|--|------|------|
-| タスク表示 | Asana 連携（外部 JSON） | TaskCreate/TaskUpdate + TodoWrite 連携 |
-| hook 処理 | 外部委譲可能 | 内蔵のみ |
-| 設定項目 | `tasks_file`, `hook_command` 等 | 最小限（3 項目） |
-| インストール | ソースビルドのみ | バイナリ配布あり |
+TUIが5分おきに自動実行するほか、手動でも確認できる：
 
-狭いスペースに詰め込むのではなく、本当に必要なものを広く使えるように、というのが基本方針。
+```bash
+wez-sidebar reap --dry  # killせずに対象プロセスを一覧表示
+wez-sidebar reap        # SIGTERM で終了
+```
 
-## アーキテクチャ
+## 仕組み
 
 ```
 Claude Code ──hook──→ wez-sidebar hook <event>
                               │
-                    ┌─────────┴──────────┐
-                    │ セッション状態更新  │
-                    │ アクティビティ抽出 │
-                    │ 危険コマンド検出   │
-                    │ Yoloモード検出     │
-                    │ gitブランチ取得    │
-                    └─────────┬──────────┘
+                    ┌─────────┴──────────────┐
+                    │ セッション状態更新      │
+                    │ アクティビティ抽出      │
+                    │ 危険コマンド検出        │
+                    │ サブエージェント追跡    │
+                    │ gitブランチ取得         │
+                    │ Yoloモード検出          │
+                    └─────────┬──────────────┘
                               │
-                    sessions.json
+                    sessions.json / usage-cache.json
                               │
                          file watcher
                               │
                     wez-sidebar TUI（ゼロポーリング）
+                              │
+                    reaper（オプトイン、5分間隔）
+                    └→ ps + wezterm cli list → 孤児kill
 ```
 
-hook イベントを受け取るたびに `sessions.json` を更新し、TUI 側はファイル変更を検知して表示を更新する。ポーリングなし。
-
-hook ハンドラーは内蔵なので外部依存ゼロ。`wez-sidebar hook PreToolUse` を呼ぶだけで動く。
+hookイベントを受け取るたびに`sessions.json`を更新し、TUI側はファイル変更を検知して表示を更新する。ポーリングなし、外部依存なし。
 
 ## セットアップ
 
 ### インストール
 
-バイナリ配布あり（Rust ツールチェーン不要）：
+Rustなしでバイナリをそのまま使える：
 
 ```bash
 # macOS (Apple Silicon)
 curl -L https://github.com/kok1eee/wez-sidebar/releases/latest/download/wez-sidebar-aarch64-apple-darwin \
   -o ~/.local/bin/wez-sidebar && chmod +x ~/.local/bin/wez-sidebar
+
+# macOS (Intel)
+curl -L https://github.com/kok1eee/wez-sidebar/releases/latest/download/wez-sidebar-x86_64-apple-darwin \
+  -o ~/.local/bin/wez-sidebar && chmod +x ~/.local/bin/wez-sidebar
+
+# Linux (x86_64)
+curl -L https://github.com/kok1eee/wez-sidebar/releases/latest/download/wez-sidebar-x86_64-linux \
+  -o ~/.local/bin/wez-sidebar && chmod +x ~/.local/bin/wez-sidebar
 ```
 
-ソースから：
+Rustがある場合：
 
 ```bash
 cargo install wez-sidebar
-# または
-git clone https://github.com/kok1eee/wez-sidebar.git
-cd wez-sidebar && cargo install --path .
 ```
 
-初回セットアップはウィザードが案内してくれる：
+### セットアップウィザード
 
 ```bash
 wez-sidebar init
 ```
 
-### Claude Code hooks 登録
+hooksの登録とWezTermキーバインドの例を案内してくれる。
 
-`~/.claude/settings.json` に追加：
+### 手動セットアップ
+
+`~/.claude/settings.json`にhooksを追加：
 
 ```json
 {
@@ -166,51 +194,107 @@ wez-sidebar init
 }
 ```
 
-### WezTerm キーバインド
+### WezTermレイアウト
+
+wez-sidebarはWezTermのペインとして動くので、セッション用ペインと一緒にレイアウトを組む。自分は2パターンを使い分けている。
+
+**Dockモード（外部モニター向け）** — 3×2 + 下部ドック：
+
+```
++--------+--------+--------+
+|   1    |   3    |   5    |
++--------+--------+--------+
+|   2    |   4    |   6    |
++--------+--------+--------+
+|         wez-sidebar dock  |
++---------------------------+
+```
+
+**Sidebarモード（MacBook向け）** — 2×2 + 右サイドバー：
+
+```
++--------+--------+------+
+|   1    |   3    |      |
++--------+--------+ side |
+|   2    |   4    | bar  |
++--------+--------+------+
+```
+
+`wezterm.lua` で起動時に自動構築する例：
 
 ```lua
--- wezterm.lua
+local wezterm = require("wezterm")
+local config = wezterm.config_builder()
+
+-- 起動時レイアウト（Dockモード: 3x2 + dock）
+wezterm.on("gui-startup", function(cmd)
+  local home = os.getenv("HOME")
+  local tab, pane1, window = wezterm.mux.spawn_window({})
+
+  -- 下部にdockを作成（25%高さ）
+  pane1:split({ direction = "Bottom", size = 0.25,
+    args = { home .. "/.local/bin/wez-sidebar", "dock" } })
+
+  -- 上部を上下に分割
+  local pane2 = pane1:split({ direction = "Bottom", size = 0.5 })
+
+  -- 上段を3分割
+  local pane3 = pane1:split({ direction = "Right", size = 0.67 })
+  local pane5 = pane3:split({ direction = "Right", size = 0.5 })
+
+  -- 下段を3分割
+  local pane4 = pane2:split({ direction = "Right", size = 0.67 })
+  local pane6 = pane4:split({ direction = "Right", size = 0.5 })
+
+  pane1:activate()
+end)
+```
+
+キーバインドで新しいタブとしてレイアウトを作る場合：
+
+```lua
+config.leader = { key = "a", mods = "CTRL", timeout_milliseconds = 2000 }
+
 config.keys = {
-  -- Sidebar（MacBook 向け）
-  {
-    key = "b",
-    mods = "LEADER",
-    action = wezterm.action_callback(function(window, pane)
-      pane:split({ direction = "Right", size = 0.2, args = { "wez-sidebar" } })
+  -- Leader+t でレイアウト選択して新規タブ作成
+  { key = "t", mods = "LEADER", action = wezterm.action.InputSelector({
+    title = "New Tab Layout",
+    choices = {
+      { id = "dock", label = "Dock (3x2 + bottom bar)" },
+      { id = "sidebar", label = "Sidebar (2x2 + right bar)" },
+    },
+    action = wezterm.action_callback(function(window, pane, id, label)
+      local home = os.getenv("HOME")
+      local tab, pane1, _ = window:mux_window():spawn_tab({})
+      if id == "dock" then
+        -- 3x2 + dock
+        pane1:split({ direction = "Bottom", size = 0.25,
+          args = { home .. "/.local/bin/wez-sidebar", "dock" } })
+        local pane2 = pane1:split({ direction = "Bottom", size = 0.5 })
+        local pane3 = pane1:split({ direction = "Right", size = 0.67 })
+        local pane5 = pane3:split({ direction = "Right", size = 0.5 })
+        local pane4 = pane2:split({ direction = "Right", size = 0.67 })
+        local pane6 = pane4:split({ direction = "Right", size = 0.5 })
+      else
+        -- 2x2 + sidebar
+        pane1:split({ direction = "Right", size = 0.12,
+          args = { home .. "/.local/bin/wez-sidebar" } })
+        local pane2 = pane1:split({ direction = "Bottom", size = 0.5 })
+        local pane3 = pane1:split({ direction = "Right", size = 0.5 })
+        local pane4 = pane2:split({ direction = "Right", size = 0.5 })
+      end
+      pane1:activate()
     end),
-  },
-  -- Dock（外部モニター向け）
-  {
-    key = "d",
-    mods = "LEADER",
-    action = wezterm.action_callback(function(window, pane)
-      pane:split({ direction = "Bottom", size = 0.25, args = { "wez-sidebar", "dock" } })
-    end),
-  },
+  }) },
 }
 ```
 
-設定ファイルは不要。これだけで動く。
-
-## キーバインド
-
-| キー | 動作 |
-|------|------|
-| `j`/`k` | セッション移動 |
-| `Enter` | ペインに切り替え |
-| `1`-`9` | 番号で直接切り替え |
-| `p` | ペインプレビュー表示 |
-| `f` | stale セッション表示切り替え |
-| `d` | セッション削除 |
-| `r` | 手動リフレッシュ |
-| `?` | ヘルプ |
+設定ファイルは不要。hooks + WezTermレイアウトだけで動く。
 
 ## おわりに
 
-cmux と比べて UI が地味なのは認める。WezTerm の TUI という制約上、リッチな実装は難しい。
+cmuxと比べてUIが地味なのは認める。WezTermのペイン内TUIという制約上、できることに限界がある。
 
-ただ WezTerm を使っていて、Claude Code を並列で動かしていて、同じウィンドウ内で完結させたいなら、これが一番シンプルに動くと思う。
-
-コードは MIT ライセンスで公開している。自分の環境に合わせて改造して使ってほしい。
+ただWezTermを使っていて、Claude Codeを並列で動かしていて、同じウィンドウ内で完結させたいなら、これが一番シンプルに動くと思う。MITライセンスで公開しているので、自分の環境に合わせて改造して使ってほしい。
 
 https://github.com/kok1eee/wez-sidebar
