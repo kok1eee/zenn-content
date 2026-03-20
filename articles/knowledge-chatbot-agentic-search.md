@@ -1,5 +1,5 @@
 ---
-title: "RAG パイプラインを捨てて claude -p に Grep させたら社内ナレッジ Bot が3時間で動いた"
+title: "RAG パイプラインを捨てて claude -p に Grep させたら3時間で社内ナレッジ Bot が動いた"
 emoji: "🔍"
 type: "tech"
 topics: ["claudecode", "ai", "rag", "slackbot", "agentic"]
@@ -418,6 +418,6 @@ RAG のベストプラクティスは山ほどある。チャンク戦略、Embe
 
 LLM の性能が上がるほど、エージェンティックサーチの精度も上がる。RAG パイプラインのチューニングに時間を使うより、LLM の進化に乗った方がいい場面は確実に増えていく。
 
-パターンコードは公開している。fork して `knowledge/` にファイルを置けば動く。
+エージェンティックサーチを信じろ。パターンコードは公開している。fork して `knowledge/` にファイルを置けば動く。
 
 https://github.com/tazawa-masayoshi/knowledge-chatbot
