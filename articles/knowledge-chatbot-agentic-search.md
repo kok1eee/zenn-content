@@ -12,7 +12,7 @@ published: true
 
 **数百ファイル規模の社内ナレッジ**を検索して回答する Slack チャットボットを作った。200ページ超の Google Sites を、RAG パイプラインなしで検索・回答できる。
 
-これは [Agentic RAG](https://docs.anthropic.com/en/docs/build-with-claude/agentic-rag)（エージェント型検索拡張生成）と呼ばれるアプローチで、LLM 自身がツールを使ってドキュメントを検索・読み込み・統合する。従来の RAG パイプライン（チャンク分割、Embedding、ベクトル DB、クエリ変換、リランキング）を `claude -p` + `Grep/Read` で置き換えた実装レポート。
+これは RAG ではない。Retrieval パイプライン（Embedding、ベクトル DB、リランキング）は存在しない。LLM が `Grep` と `Read` で直接ファイルを検索・読み込み・統合して回答する。**エージェンティックサーチ**とでも呼ぶべきアプローチで、RAG パイプラインを丸ごと捨てた実装レポート。
 
 **前提条件**: この方式が有効なのは**数百ファイル規模**のナレッジ。数千〜数万ドキュメントには従来 RAG の方が適している。
 
@@ -54,7 +54,7 @@ Slack メッセージ → Rust (DB ポーリング) → claude -p → PR → CI
 
 RAG パイプラインなんか要らない。LLM 自体がリトリーバーになればいい。
 
-## Agentic RAG: LLM 自体をリトリーバーにする
+## エージェンティックサーチ: LLM 自体をリトリーバーにする
 
 `claude -p`（Claude Code の非対話モード）に `Read`、`Grep`、`Glob` ツールだけ許可して実行する。LLM がナレッジファイルを直接検索・読み込み・統合して回答する。
 
@@ -70,11 +70,11 @@ claude -p（Read, Grep, Glob のみ許可）
 Slack に返信
 ```
 
-これは概念としては新しくない。[Agentic RAG](https://docs.anthropic.com/en/docs/build-with-claude/agentic-rag) や Self-RAG、Tool-augmented LLM として2023年から議論されている。この記事のオリジナリティは **`claude -p` という CLI 一発で実装できた**ことと、**数百ファイル規模なら運用コストがほぼゼロ**という実践レポートにある。
+LLM にツールを持たせて検索させるアプローチは [Agentic RAG](https://docs.anthropic.com/en/docs/build-with-claude/agentic-rag) や Tool-augmented LLM として議論されてきた。ただし今回は RAG パイプラインが一切ない。Embedding もベクトル DB も使わず、LLM が `Grep` でテキスト検索して `Read` で読むだけ。この記事のオリジナリティは **`claude -p` という CLI 一発で実装できた**ことと、**数百ファイル規模なら運用コストがほぼゼロ**という実践レポートにある。
 
 **従来 RAG パイプラインとの比較:**
 
-| 従来 RAG | Agentic RAG (`claude -p`) |
+| 従来 RAG | エージェンティックサーチ (`claude -p`) |
 |---|---|
 | チャンク分割 | 不要（ファイルそのまま） |
 | Embedding 生成 | 不要 |
@@ -212,7 +212,7 @@ Claude が自分で考える:
     4. 5ファイルを統合して回答
 ```
 
-LLM が検索クエリの生成・実行・結果の評価・追加検索の判断を全部やる。これが Agentic RAG のコア。
+LLM が検索クエリの生成・実行・結果の評価・追加検索の判断を全部やる。Retrieval パイプラインは存在しない。これがエージェンティックサーチのコア。
 
 ## セキュリティ: 同僚にぶっ壊された
 
@@ -358,9 +358,9 @@ KNOWLEDGE_SUBDIR=soumu uv run python -m src.bot
 
 ## トレードオフ: いつこの方式を使うべきか
 
-Agentic RAG は万能ではない。
+エージェンティックサーチは万能ではない。
 
-| | Agentic RAG (`claude -p`) | 従来 RAG |
+| | エージェンティックサーチ (`claude -p`) | 従来 RAG |
 |---|---|---|
 | **ナレッジ規模** | 〜数百ファイル | 数千〜数万ドキュメント |
 | **レイテンシ（回答生成込み）** | 10〜45秒 | 5〜20秒 |
@@ -405,7 +405,7 @@ Agentic RAG は万能ではない。
 
 ## まとめ
 
-- `claude -p` + `Read/Grep/Glob` だけで社内ナレッジ検索 Bot が作れる（Agentic RAG）
+- `claude -p` + `Read/Grep/Glob` だけで社内ナレッジ検索 Bot が作れる（RAG ではない。エージェンティックサーチ）
 - 数百ファイル規模なら、RAG パイプライン（Embedding, ベクトルDB, クエリ変換, リランキング）は全て不要
 - LLM 自身が検索クエリの生成から結果の統合まで行う。新しい概念ではないが `claude -p` で驚くほど簡単に実装できる
 - **セキュリティは自分で実装が必要**。本番で情報漏洩のインシデントが起きた。機密なしの社内ナレッジに限定すべき
