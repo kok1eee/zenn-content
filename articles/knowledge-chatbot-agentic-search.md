@@ -20,7 +20,7 @@ published: true
 
 ただし、自分は Dify での RAG Bot 開発1年、Claude Code でのエージェント自作（ambient-task-agent）の経験がある上での3時間。初めて触る人は Slack App の設定、Socket Mode の理解、Claude Code のインストールなど、前提知識の習得に時間がかかる。
 
-https://github.com/tazawa-masayoshi/knowledge-chatbot
+https://github.com/kok1eee/knowledge-chatbot
 
 ## 1年間 Dify と RAG で格闘した
 
@@ -457,4 +457,4 @@ RAG のベストプラクティスは山ほどある。チャンク戦略、Embe
 
 エージェンティックサーチを信じろ。パターンコードは公開している。fork して `knowledge/` にファイルを置けば動く。
 
-https://github.com/tazawa-masayoshi/knowledge-chatbot
+https://github.com/kok1eee/knowledge-chatbot

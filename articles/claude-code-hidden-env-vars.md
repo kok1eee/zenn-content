@@ -232,6 +232,28 @@ return Math.min($, q)                     // AUTOCOMPACT_PCT_OVERRIDE
 
 どちらも `Math.min` で「デフォルトか指定値の小さい方」を採用する設計。つまり**コンパクトを遅らせたいなら、何も設定しないのが最適解**。
 
+## おまけ2: Claude Code のコードネームは「天狗」
+
+バイナリを調べていて気づいたが、内部のテレメトリイベントやフィーチャーフラグに `tengu_` というプレフィックスが大量に使われている。
+
+```bash
+strings $(which claude) | grep -oE 'tengu_[a-z_]+' | sort -u | wc -l
+# → 785
+```
+
+**785個**。例えば：
+
+- `tengu_sm_compact` — Session Memory コンパクト
+- `tengu_off_switch` — 緊急停止スイッチ
+- `tengu_session_memory` — セッションメモリ
+- `tengu_api_query` — API クエリ
+- `tengu_agent_created` — エージェント作成イベント
+- `tengu_slate_heron` — 時間ベースのマイクロコンパクト設定
+
+**tengu（天狗）が Claude Code の内部コードネーム**のようだ。Anthropic のチームが日本語由来のコードネームを使っているのは面白い。
+
+ちなみにこれらはサーバー側のフィーチャーフラグで、`lT("tengu_xxx", defaultValue)` のような形で参照されている。ユーザーが直接設定するものではないが、Claude Code の内部でどんな機能が実験されているかの手がかりにはなる。
+
 ## まとめ
 
 ```bash
@@ -241,4 +263,4 @@ strings $(which claude) | grep -oE 'CLAUDE_CODE_[A-Z_]+' | sort -u
 
 新しい `/init` は「CLAUDE.md + Skills + Hooks を対話的にセットアップ」してくれる明確な進化。ただしまだテスト中で、プラグイン検出や既存設定との重複チェックには改善の余地がある。
 
-隠しフラグは130個以上あるが、全部覚える必要はない。探し方さえ知っていれば十分。
+隠しフラグは130個以上あるが、全部覚える必要はない。探し方さえ知っていれば十分。そしてバイナリを覗くと、785個の `tengu_` フラグが Claude Code の裏側で動いていることも分かる。
