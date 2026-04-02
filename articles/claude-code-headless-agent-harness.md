@@ -24,7 +24,7 @@ https://zenn.dev/tazawa_masayoshi/articles/knowledge-chatbot-agentic-search
 
 ナレッジ Bot に必要なのは `Read`、`Grep`、`Glob` の3つだけ。でも `claude -p` を起動すると、裏では CLAUDE.md の読み込み、プラグイン・スキルの展開、hooks の実行が走る。コーディングエージェントとして必要な初期化が全部動く。
 
-ナレッジの検索・回答だけさせたいのに、毎回コーディングエージェントとしてフル装備で起動している。
+チャットボットとしてナレッジの検索・回答だけさせたいのに、hooks が発火し、プラグインが展開され、毎回コーディングエージェントとしてフル装備で起動している。
 
 ## o-m-cc の HEADLESS フラグで対処していた
 
@@ -54,9 +54,9 @@ is_headless() {
 
 でも実際には、Claude Code のログインか API キーで認証して、ツール呼び出しは `claude -p` が処理する構造だった。**`claude -p` の上にもう一層被せただけ**で、根本的な問題は何も変わらない。本末転倒。
 
-## Bedrock API で直接叩いてみた
+## Bedrock API — 本来はこれが正しい
 
-方向を変えた。`claude -p` を使わず、Bedrock API で Anthropic のモデルを直接呼ぶ。
+本来のアプローチはこっちだと思っている。Bedrock API でモデルを直接叩いて、[Strands Agents](https://github.com/strands-agents/sdk-python) や [Rig](https://github.com/0xPlaygrounds/rig) のようなフレームワークでエージェントを組む。ツール定義もセッション管理も自前で設計できる。`claude -p` のハーネスに依存しない、正攻法。
 
 Sonnet 4.6 を使ったら、**1ラリーで $0.7**。ナレッジ検索で複数ファイルを読むとトークン消費がリッチすぎる。1日20件の問い合わせで月額 $400 超。Max プランの方が安い。
 
@@ -70,21 +70,25 @@ Haiku: 3ファイル見つかりました。読みますか？ → 承認待ち
 Haiku: 回答を生成しますか？ → 承認待ち
 ```
 
-聞く、止まる、聞く、止まる。ナレッジ Bot に必要なのは「質問を受けたら自分で Grep して Read して回答を返す」こと。Haiku はツールを使う判断を自力でできず、毎回確認を求めてくる。
+聞く、止まる、聞く、止まる。同じスキルプロンプトを渡しているのに、Sonnet が一発で完了する内容を Haiku は細かく区切って確認してくる。プロンプト設計でもう少し粘れた可能性はあるが、ナレッジ Bot に求めるのは「質問を受けたら自分で Grep して Read して回答を返す」自律性であり、毎ターン確認を求められる時点で使い物にならなかった。
 
-やっぱり **Sonnet 4.6 のパワーが必要**。Sonnet は自分で検索戦略を立てて、複数ファイルを読んで、統合して回答を作る。このエージェンティックな動きができるのは Sonnet のモデル性能あってこそ。
+やっぱり **Sonnet 4.6 のパワーが必要**。Sonnet は自分で検索戦略を立てて、複数ファイルを読んで、統合して回答を作る。このエージェンティックな動きはモデル性能の差がそのまま出る。
 
-でも Bedrock で Sonnet は高すぎる。`claude -p` は大袈裟すぎる。詰んだ。
+正しいアプローチなのはわかっている。でも Bedrock で Sonnet は高すぎる。`claude -p` は大袈裟すぎる。詰んだ。
 
-## free-code / not-claude-code-emulator
+## Claude Code のソースコード流出
 
-詰んだと思ったところで、[not-claude-code-emulator](https://github.com/code-yeongyu/not-claude-code-emulator) の存在を知った。Claude Code の API リクエストをエミュレートするツール。[free-code](https://github.com/paoloanzn/free-code) も同じ文脈で、3,500+ star で完全に公知のプロジェクト。
+そんなタイミングで、Claude Code のソースコードが流出した。Anthropic が npm パッケージに難読化されたソースを含めて配布しており、それが復元・公開された。
 
-Claude Code のハーネス（ツール制限、セッション管理、暴走防止）を、Max プランの `claude -p` に依存せず再現できる。バックエンドに Anthropic API を直接指定できる。
+これ自体は自分がどうこうする話ではない。ただ、この流出をきっかけに [free-code](https://github.com/paoloanzn/free-code)（3,500+ star）や [not-claude-code-emulator](https://github.com/code-yeongyu/not-claude-code-emulator) のようなプロジェクトが生まれ、`claude -p` を経由せずに Claude のモデルをエージェンティックに動かすアプローチが公知のものになった。
 
-そのままでは動かなかった。が、調整して**実際に動かすことができた**。
+## `claude -p` の外へ
 
-Sonnet 4.6 のエージェンティックな動きを、`claude -p` の大袈裟なハーネスなしで使える。Max サブスクの範囲内で動くので追加費用はない。不要な初期化やプラグイン展開が走らない分、軽い。
+[not-claude-code-emulator](https://github.com/code-yeongyu/not-claude-code-emulator) や [free-code](https://github.com/paoloanzn/free-code)（3,500+ star）の存在を知った。`claude -p` を経由せずに Claude のモデルをエージェンティックに動かすアプローチが、すでに公知のものとして存在していた。
+
+これらのプロジェクト自体を使ったわけではないが、アプローチを参考にして試行錯誤した結果、**Sonnet 4.6 をエージェンティックに動かせる環境を構築できた**。
+
+`claude -p` の大袈裟なハーネスなしで、Sonnet 4.6 のパワーが使える。不要な初期化やプラグイン展開が走らない分、軽い。
 
 ## これで何ができるか
 
